@@ -1,4 +1,4 @@
-package at.itp_uno_wifi_provider.activity;
+package at.itp.uno.activity;
 
 import android.app.Activity;
 import android.content.Intent;

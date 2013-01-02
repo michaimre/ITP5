@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/1213ws-itp5-uno/!svn/ver/6/activities/res/layout
+END
+activity_wifiserver.xml
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/1213ws-itp5-uno/!svn/ver/6/activities/res/layout/activity_wifiserver.xml
+END
+activity_main.xml
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/1213ws-itp5-uno/!svn/ver/6/activities/res/layout/activity_main.xml
+END
+activity_clientgame.xml
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/1213ws-itp5-uno/!svn/ver/6/activities/res/layout/activity_clientgame.xml
+END
+activity_wificlient.xml
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/1213ws-itp5-uno/!svn/ver/6/activities/res/layout/activity_wificlient.xml
+END
+activity_servergame.xml
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/1213ws-itp5-uno/!svn/ver/10/activities/res/layout/activity_servergame.xml
+END

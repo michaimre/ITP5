@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/b_joinGame"
+        android:layout_alignParentLeft="true"
+        android:text="TextView" />
+
+    <LinearLayout
+        android:id="@+id/openSocketButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="20.0dip"
+        android:gravity="center_horizontal"
+        android:weightSum="1.0" >
+
+        <Button
+            android:id="@+id/b_OpenSocket"
+            style="@style/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="@string/a_wifiserver_listener"
+            android:textSize="14.0dip"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/localhostButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/openSocketButton"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="8.0dip"
+        android:gravity="center_horizontal"
+        android:weightSum="1.0" >
+
+        <Button
+            android:id="@+id/b_Localhost"
+            style="@style/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="@string/a_wifiserver_localhost"
+            android:textSize="14.0dip"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</RelativeLayout>

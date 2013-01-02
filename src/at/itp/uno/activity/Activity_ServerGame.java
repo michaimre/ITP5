@@ -1,4 +1,4 @@
-package at.itp_uno_wifi_provider.activity;
+package at.itp.uno.activity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,23 +8,18 @@ import java.util.Random;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import at.itp_uno_wifi_provider.Client_AsyncTask;
+import at.itp.uno.data.Card;
+import at.itp.uno.data.CardToResourceId;
+import at.itp.uno.wifi.Client_AsyncTask;
+import at.itp.uno.wifi.ServiceConnection_Service_WifiAdmin;
+import at.itp.uno.wifi.Service_WifiAdmin;
+import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
 import at.itp_uno_wifi_provider.R;
-import at.itp_uno_wifi_provider.ServiceConnection_Service_WifiAdmin;
-import at.itp_uno_wifi_provider.Service_WifiAdmin;
-import at.itp_uno_wifi_provider.R.id;
-import at.itp_uno_wifi_provider.R.layout;
-import at.itp_uno_wifi_provider.Service_WifiAdmin.Binder_Service_WifiAdmin;
-import at.itp_uno_wifi_provider.card.Card;
-import at.itp_uno_wifi_provider.card.CardToResourceId;
 
 public class Activity_ServerGame extends Activity implements
 		View.OnClickListener {

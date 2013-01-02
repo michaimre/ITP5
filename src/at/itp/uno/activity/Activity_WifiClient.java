@@ -1,32 +1,23 @@
-package at.itp_uno_wifi_provider.activity;
+package at.itp.uno.activity;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import at.itp.uno.wifi.WifiAdapter;
+import at.itp.uno.wifi.Wifi_Broadcastreceiver;
 import at.itp_uno_wifi_provider.R;
-import at.itp_uno_wifi_provider.WifiAdapter;
-import at.itp_uno_wifi_provider.Wifi_Broadcastreceiver;
-import at.itp_uno_wifi_provider.R.id;
-import at.itp_uno_wifi_provider.R.layout;
 
 public class Activity_WifiClient extends Activity implements Button.OnClickListener , ListView.OnItemClickListener{
 	
