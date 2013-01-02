@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ITP_UNO_Wifi_provider</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="a_main_startGame">Start Game</string>
+    <string name="a_main_joinGame">Join Game</string>
+    <string name="a_main_options">Options</string>
+    <string name="a_wifiserver_listener">Socket Listener</string>
+    <string name="a_wifiserver_localhost">Connect to Localhost (StartGame)</string>
+</resources>

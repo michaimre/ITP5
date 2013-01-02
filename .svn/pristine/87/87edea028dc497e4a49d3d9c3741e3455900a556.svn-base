@@ -1,0 +1,230 @@
+package at.itp.uno.server.core;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+
+import at.itp.uno.data.ServerPlayer;
+import at.itp.uno.gamelogic.GameTable;
+import at.itp.uno.network.SocketFactory;
+import at.itp.uno.network.UnexpectedPlayerResponseEception;
+import at.itp.uno.network.UnoSocketWrapper;
+import at.itp.uno.network.protocol.ProtocolMessages;
+import at.itp.uno.server.ServerUI;
+
+public class ServerLogic implements Runnable{
+
+	private ServerUI serverUI;
+	private ServerSocket serverSocket;
+	private SocketFactory socketFactory;
+	private LobbyAdminListener lobbyAdminListener;
+	private int port;
+
+	private boolean gameStarted;
+
+	private GameTable gameTable;
+
+	public ServerLogic(SocketFactory socketFactory, int port, ServerUI serverUI){
+		this.serverUI=serverUI;
+		this.socketFactory=socketFactory;
+		this.port=port;
+
+		gameStarted = false;
+
+		gameTable = new GameTable(serverUI);
+	}
+
+	private void closeServerSocket(){
+		if(!serverSocket.isClosed()){
+			try {
+				serverSocket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public void run() {
+		serverUI.showMessage("Starting server loop");
+		//Open server, gather players
+		lobbySetup();
+		if(gameStarted){
+			//Set up table and players
+			gameTable.setUpGame();
+			//Do game stuff
+			gameLoop();
+
+			//Restart thingy here
+		}
+		else{
+			serverUI.showMessage("Didn't start game");
+		}
+		serverUI.showMessage("Server loop stopping");
+	}
+
+	/////////////
+	//GameLobby//
+	/////////////
+
+	/**
+	 * Gathers connecting player in a <code>GameTable</code> and creates a <code>LobbyAdminListener</code> to listen for 
+	 * lobby admin commands.
+	 */
+	private void lobbySetup(){
+		serverUI.showMessage("Starting lobby setup");
+		try {
+			serverSocket = socketFactory.createServerSocket(port);
+			serverUI.showMessage("Waiting for admin connection");
+			lobbyAdminListener = new LobbyAdminListener(this, new UnoSocketWrapper(serverSocket.accept(), 0));
+			new Thread(lobbyAdminListener).start();
+			serverUI.showMessage("Admin connected");
+			int cid = 1;
+			while(!serverSocket.isClosed()){
+				try{
+					//TODO timeout set to 0 while in lobby
+					serverUI.showMessage("Waiting for player to join");
+					UnoSocketWrapper tmpsocket = new UnoSocketWrapper(serverSocket.accept(), 0);
+					synchronized (gameTable) {
+						try{
+							ServerPlayer newPlayer = new ServerPlayer(cid, tmpsocket);
+							gameTable.addPlayer(newPlayer);
+							cid++;
+						}
+						catch(IOException ioe){
+							ioe.printStackTrace();
+						}
+					}
+				}
+				catch(SocketException se){
+					startGame();
+				}
+			}
+			lobbyAdminListener.closeSocket();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void startGame() {
+		serverUI.showMessage("Lobby closing, game starting");
+		closeServerSocket();
+		gameStarted = true;
+	}
+
+	public boolean kickPlayer(int playerID) {
+		synchronized (gameTable) {
+			return gameTable.kickPlayer(playerID);
+		}
+	}
+
+	public void closeLobby() {
+		closeServerSocket();
+		synchronized(gameTable){
+			gameTable.closeTable();
+		}
+		gameStarted = false;
+	}
+
+	/////////////
+	//GameLogic//
+	/////////////
+
+	public void gameLoop(){
+		boolean endofturn = Boolean.FALSE;
+		serverUI.showMessage("Starting game loop");
+		ServerPlayer currentPlayer = null;
+		while((currentPlayer = gameTable.nextTurn())!=null){
+			serverUI.showMessage("Next player: "+currentPlayer.toString());
+			try {
+				if(gameTable.getCardsToDraw()>0){
+					serverUI.showMessage("Player needs to draw cards");
+					if(gameTable.getWildColor()>=0){
+						serverUI.showMessage("Wild four detected, force draw");
+						gameTable.forceDraw(currentPlayer);
+					}
+					else{
+						while(!endofturn){
+							serverUI.showMessage("Waiting for player decision");
+							int action = currentPlayer.getAction();
+							switch(action){
+							case ProtocolMessages.GTM_PLAYCARD:
+								if(gameTable.playCardAction(currentPlayer)){
+									endofturn=Boolean.TRUE;
+									currentPlayer.setEndOfTurn();
+								}
+								break;
+
+							case ProtocolMessages.GTM_DRAWCARD:
+								gameTable.drawCardAction(currentPlayer);
+								endofturn=Boolean.TRUE;
+								currentPlayer.setEndOfTurn();
+								break;
+
+							default:
+								if(action<0){
+									throw new UnexpectedPlayerResponseEception("Error code received: "+action);
+								}
+								break;
+							}
+						}
+					}
+				}
+				else{
+					while(!endofturn){
+						serverUI.showMessage("Waiting for player action");
+						int action = currentPlayer.getAction();
+						switch(action){
+						case ProtocolMessages.GTM_PLAYCARD:
+							if(gameTable.playCardAction(currentPlayer)){
+								endofturn=Boolean.TRUE;
+								currentPlayer.setEndOfTurn();
+							}
+							break;
+
+						case ProtocolMessages.GTM_DRAWCARD:
+							gameTable.drawCardAction(currentPlayer);
+							endofturn=Boolean.TRUE;
+							currentPlayer.setEndOfTurn();
+							break;
+
+						case ProtocolMessages.GTM_ACCUSE:
+							gameTable.playerAccuseAction(currentPlayer);
+							break;
+
+						default:
+							if(action<0){
+								throw new UnexpectedPlayerResponseEception("Error code received: "+action);
+							}
+							break;
+						}
+					}
+				}
+			}  catch(IOException e) {
+				gameTable.playerDisconnected(currentPlayer);
+				e.printStackTrace();
+			}
+			try {
+				switch(currentPlayer.getAction()){
+				case ProtocolMessages.GTM_CALLUNO:
+					if(endofturn){
+						gameTable.callUnoAction(currentPlayer);
+					}
+					break;
+
+				default:
+					break;
+				}
+			} catch(SocketTimeoutException ste){
+				//end of grace period
+			} catch (IOException e) {
+				gameTable.playerDisconnected(currentPlayer);
+				e.printStackTrace();
+			}
+			gameTable.endTurn();
+		}
+		gameTable.endGame();
+	}
+}
+

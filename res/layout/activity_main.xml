@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/startscreen" >
+
+    <LinearLayout
+        android:id="@+id/optionsButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="20.0dip"
+        android:gravity="center_horizontal"
+        android:weightSum="1.0" >
+
+        <Button
+            android:id="@+id/b_options"
+            style="@style/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="@string/a_main_options"
+            android:textSize="14.0dip"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/joinButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/optionsButton"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="8.0dip"
+        android:gravity="center_horizontal"
+        android:weightSum="1.0" >
+
+        <Button
+            android:id="@+id/b_joinGame"
+			style="@style/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="@string/a_main_joinGame"
+            android:textSize="14.0dip"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/startButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/joinButton"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="8.0dip"
+        android:gravity="center_horizontal"
+        android:weightSum="1.0" >
+
+        <Button
+            android:id="@+id/b_startGame"
+            style="@style/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="@string/a_main_startGame"
+            android:textSize="14.0dip"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</RelativeLayout>

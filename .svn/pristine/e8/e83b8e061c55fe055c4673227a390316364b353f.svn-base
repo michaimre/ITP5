@@ -1,0 +1,72 @@
+package at.itp_uno_wifi_provider.card;
+
+public class Card implements Comparable<Card> {
+	
+	public static final short ONE = 1;
+	public static final short TWO = 2;
+	public static final short THREE = 3;
+	public static final short FOUR = 4;
+	public static final short FIVE = 5;
+	public static final short SIX = 6;
+	public static final short SEVEN = 7;
+	public static final short EIGHT = 8;	
+	public static final short NINE = 9;
+	public static final short ZERO = 10;
+	public static final short SKIP = 11;
+	public static final short DRAWTWO = 12;
+	public static final short REVERSE = 13;
+	public static final short WILD = 14;
+	public static final short WILDFOUR = 15;
+
+	public static final short RED = 1;
+	public static final short GREEN = 2;
+	public static final short BLUE = 3;
+	public static final short YELLOW = 4;
+	
+	private short color;
+	private short value;
+
+	public Card(short color, short value) {
+		this.color = color;
+		this.value = value;
+	}
+
+	@Override
+	public int compareTo(Card paramCard) {
+		int i = 0;
+		
+		if (paramCard.getColor() < this.color)
+			i = 1;
+		
+		if (paramCard.getColor() > this.color)
+			i = -1;
+		
+		if (i != 0)
+			return i;
+		else {
+			if (paramCard.getValue() < this.value)
+				i = -1;
+			else if (paramCard.getValue() > this.value)
+				i = 1;
+			else
+				i = 0;	
+		}
+		return i;
+	}
+
+	public short getColor() {
+		return this.color;
+	}
+
+	public short getValue() {
+		return this.value;
+	}
+
+	public void setColor(short color) {
+		this.color = color;
+	}
+
+	public void setValue(short value) {
+		this.value = value;
+	}
+}
