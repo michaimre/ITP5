@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 import at.itp.uno.activity.Activity_ServerGame;
 import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;

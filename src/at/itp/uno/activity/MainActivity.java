@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import at.itp.uno.wifi.Service_WifiAdmin;
 import at.itp_uno_wifi_provider.R;
 
 public class MainActivity extends Activity implements Button.OnClickListener {
@@ -35,8 +36,10 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 	@Override
 	public void onClick(View v) {
 		if(v.equals(b_startGame)){
-			Log.v("Here","Here");
-			Intent i = new Intent(this, Activity_WifiServer.class);
+			Log.v("Here","Here"); 
+			Intent i = new Intent(this, Service_WifiAdmin.class);
+		    startService(i);
+			i = new Intent(this, Activity_WifiServer.class);
 			startActivity(i);
 		}
 		else{

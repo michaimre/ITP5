@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import at.itp.uno.wifi.WifiAdapter;
-import at.itp.uno.wifi.Wifi_Broadcastreceiver;
 import at.itp_uno_wifi_provider.R;
 
 public class Activity_WifiClient extends Activity implements Button.OnClickListener , ListView.OnItemClickListener{
@@ -24,7 +23,6 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 	private Button b_searchSpots;
 	private ListView lv_hotSpots;
 	private WifiManager wifi_m;
-	private Wifi_Broadcastreceiver wifi_br = null;
 	private IntentFilter wifi_if = null;
 	
     @Override
@@ -113,22 +111,11 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 	@Override
     protected void onResume() {
         super.onResume();
-        if(wifi_br != null)
-        {
-        	wifi_br = null;
-        }
-        
-        wifi_br = new Wifi_Broadcastreceiver(wifi_m , this);
-        //Registrieren des BroadcastReceivers mit dem erstellten intent Filter
-        Log.v("BroadcastReceiver","OnResume");
-        registerReceiver(wifi_br,wifi_if);
     }
     
     @Override
     protected void onPause() {
         super.onPause();
-        /* unregister the broadcast receiver */
-        unregisterReceiver(wifi_br);
     }
 
 }

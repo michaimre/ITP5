@@ -1,11 +1,8 @@
 package at.itp.uno.wifi;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -16,9 +13,6 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Parcel;
-import android.os.RemoteException;
 import android.util.Log;
 
 public class Service_WifiAdmin extends Service {

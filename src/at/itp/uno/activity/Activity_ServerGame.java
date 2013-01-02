@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import at.itp.uno.data.Card;
+import at.itp.uno.data.CardFaces;
 import at.itp.uno.data.CardToResourceId;
 import at.itp.uno.wifi.Client_AsyncTask;
 import at.itp.uno.wifi.ServiceConnection_Service_WifiAdmin;
@@ -65,11 +66,11 @@ public class Activity_ServerGame extends Activity implements
 		stapelLayout = (LinearLayout) findViewById(R.id.linearLayout_stapel);
 		horizontalLayout.setOnClickListener(this);
 		
-		cardsList.add(new Card((short) 1, (short) 1));
+		cardsList.add(new Card((short) CardFaces.BLUE, (short) 1));
 		cardsList.add(new Card((short) 0, (short) 14));
-		cardsList.add(new Card((short) 4, (short) 7));
-		cardsList.add(new Card((short) 3, (short) 9));
-		cardsList.add(new Card((short) 2, (short) 11));
+		cardsList.add(new Card((short) CardFaces.YELLOW, (short) 7));
+		cardsList.add(new Card((short) CardFaces.RED, (short) 9));
+		cardsList.add(new Card((short) CardFaces.GREEN, (short) 11));
 
 		stapel_hin.measure(View.MeasureSpec.makeMeasureSpec(0, 0),
 				View.MeasureSpec.makeMeasureSpec(0, 0));

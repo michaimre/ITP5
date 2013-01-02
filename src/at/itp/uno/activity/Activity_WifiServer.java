@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import at.itp.uno.wifi.Service_WifiAdmin;
-import at.itp.uno.wifi.Socket_AsyncTask;
 import at.itp_uno_wifi_provider.R;
 
 public class Activity_WifiServer extends Activity implements Button.OnClickListener{
@@ -39,8 +38,8 @@ private Intent i = null;
 		
 		if(v.equals(OpenSocket)){
 			Text.setText("starting Socket");
-			Socket_AsyncTask task = new Socket_AsyncTask(this, Text);
-			task.execute();
+			//Socket_AsyncTask task = new Socket_AsyncTask(this, Text);
+			//task.execute();
 			Text.setText("Socket started");
 		}
 		else{
