@@ -1,4 +1,4 @@
-package at.itp.uno.activity;
+package at.itp_uno_wifi_provider.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,9 +8,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import at.itp.uno.wifi.Service_WifiAdmin;
-import at.itp.uno.wifi.Socket_AsyncTask;
 import at.itp_uno_wifi_provider.R;
+import at.itp_uno_wifi_provider.Service_WifiAdmin;
+import at.itp_uno_wifi_provider.Socket_AsyncTask;
 
 public class Activity_WifiServer extends Activity implements Button.OnClickListener{
 private Button OpenSocket, Localhost;

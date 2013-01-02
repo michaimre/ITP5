@@ -1,9 +1,9 @@
-package at.itp.uno.activity;
+package at.itp_uno_wifi_provider.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.EditText;
-import at.itp.uno.wifi.Client_AsyncTask;
+import at.itp_uno_wifi_provider.Client_AsyncTask;
 import at.itp_uno_wifi_provider.R;
 import at.itp_uno_wifi_provider.R.id;
 import at.itp_uno_wifi_provider.R.layout;

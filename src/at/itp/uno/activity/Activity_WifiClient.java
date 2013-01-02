@@ -1,4 +1,4 @@
-package at.itp.uno.activity;
+package at.itp_uno_wifi_provider.activity;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -22,9 +22,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import at.itp.uno.wifi.WifiAdapter;
-import at.itp.uno.wifi.Wifi_Broadcastreceiver;
 import at.itp_uno_wifi_provider.R;
+import at.itp_uno_wifi_provider.WifiAdapter;
+import at.itp_uno_wifi_provider.Wifi_Broadcastreceiver;
 import at.itp_uno_wifi_provider.R.id;
 import at.itp_uno_wifi_provider.R.layout;
 

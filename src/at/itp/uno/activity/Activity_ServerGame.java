@@ -1,4 +1,4 @@
-package at.itp.uno.activity;
+package at.itp_uno_wifi_provider.activity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,18 +8,23 @@ import java.util.Random;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import at.itp.uno.data.Card;
-import at.itp.uno.data.CardToResourceId;
-import at.itp.uno.wifi.Client_AsyncTask;
-import at.itp.uno.wifi.ServiceConnection_Service_WifiAdmin;
-import at.itp.uno.wifi.Service_WifiAdmin;
-import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
+import android.widget.TextView;
+import at.itp_uno_wifi_provider.Client_AsyncTask;
 import at.itp_uno_wifi_provider.R;
+import at.itp_uno_wifi_provider.ServiceConnection_Service_WifiAdmin;
+import at.itp_uno_wifi_provider.Service_WifiAdmin;
+import at.itp_uno_wifi_provider.R.id;
+import at.itp_uno_wifi_provider.R.layout;
+import at.itp_uno_wifi_provider.Service_WifiAdmin.Binder_Service_WifiAdmin;
+import at.itp_uno_wifi_provider.card.Card;
+import at.itp_uno_wifi_provider.card.CardToResourceId;
 
 public class Activity_ServerGame extends Activity implements
 		View.OnClickListener {
@@ -31,31 +36,40 @@ public class Activity_ServerGame extends Activity implements
 
 	private List<Card> cardsList = new ArrayList();
 	private CardToResourceId cdti;
-	private LinearLayout horizontalLayout;
+	private LinearLayout horizontalLayout, stapelLayout;
+	
 	private LinearLayout.LayoutParams layoutParams;
 	private Random randomGenerator = new Random();
 	private ImageView stapel_ab;
 	private ImageView stapel_hin;
-
+	private ImageView mischen; 
+	
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.activity_servergame);
-		b_sendBroadcast = (Button) findViewById(R.id.b_sendBroadcast);
+//		b_sendBroadcast = (Button) findViewById(R.id.b_sendBroadcast);
 		// et_broadcastMessage = (EditText)findViewById(R.id.et_Message);
-		b_sendBroadcast.setOnClickListener(this);
+//		b_sendBroadcast.setOnClickListener(this);
 		Client_AsyncTask task = new Client_AsyncTask(this, this);
 		task.execute();
 
 		cdti = new CardToResourceId();
-		stapel_ab = ((ImageView) findViewById(2131165196));
-		stapel_hin = ((ImageView) findViewById(2131165195));
+		
+		stapel_ab = (ImageView) findViewById(R.id.imageView_stapel_ab);
+		stapel_hin = (ImageView) findViewById(R.id.imageView_stapel_hin);
+		mischen = (ImageView) findViewById(R.id.imageView_mischen);
+		
 		stapel_ab.setOnClickListener(this);
 		stapel_hin.setOnClickListener(this);
-		horizontalLayout = ((LinearLayout) findViewById(2131165194));
+		mischen.setOnClickListener(this);
+		
+		horizontalLayout = (LinearLayout) findViewById(R.id.scrollViewLinearLayout);
+		stapelLayout = (LinearLayout) findViewById(R.id.linearLayout_stapel);
 		horizontalLayout.setOnClickListener(this);
-
+		
 		cardsList.add(new Card((short) 1, (short) 1));
 		cardsList.add(new Card((short) 0, (short) 14));
 		cardsList.add(new Card((short) 4, (short) 7));
@@ -66,8 +80,11 @@ public class Activity_ServerGame extends Activity implements
 				View.MeasureSpec.makeMeasureSpec(0, 0));
 
 		layoutParams = new LinearLayout.LayoutParams(new Double(
-				0.45 * stapel_hin.getMeasuredWidth()).intValue(), new Double(
-				0.45 * stapel_hin.getMeasuredHeight()).intValue());
+				0.60 * stapel_hin.getMeasuredWidth()).intValue(), new Double(
+				0.60 * stapel_hin.getMeasuredHeight()).intValue());
+		
+		stapel_ab.setLayoutParams(layoutParams);
+		stapel_hin.setLayoutParams(layoutParams);
 		drawCardsOnScrollView(cardsList);
 	}
 
@@ -81,7 +98,7 @@ public class Activity_ServerGame extends Activity implements
 
 		if (v.equals(stapel_ab)) {
 			addCardToHand();
-		} else if (v.equals(b_sendBroadcast)) {
+		} else if (v.equals(mischen)) {
 			sortCards(cardsList);
 		} else {
 			removeCardFromHand(j);
@@ -152,7 +169,7 @@ public class Activity_ServerGame extends Activity implements
 	}
 
 	private Card randomCard() {
-		return new Card((short) this.randomGenerator.nextInt(5),
-				(short) this.randomGenerator.nextInt(15));
+		return new Card((short) this.randomGenerator.nextInt(4),
+				(short) this.randomGenerator.nextInt(14));
 	}
 }
