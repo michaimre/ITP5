@@ -5,7 +5,6 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -23,7 +22,6 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 	private Button b_searchSpots;
 	private ListView lv_hotSpots;
 	private WifiManager wifi_m;
-	private IntentFilter wifi_if = null;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,9 +38,6 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
           wifi_m.setWifiEnabled(true);
         }
         
-        wifi_if = new IntentFilter();
-        wifi_if.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-        wifi_if.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         wifi_m.createWifiLock(1, "WifiLock");
         
         
@@ -107,15 +102,4 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 		
 		
 	}
-	
-	@Override
-    protected void onResume() {
-        super.onResume();
-    }
-    
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
 }

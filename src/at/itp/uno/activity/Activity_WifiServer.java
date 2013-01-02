@@ -12,7 +12,7 @@ import at.itp.uno.wifi.Service_WifiAdmin;
 import at.itp_uno_wifi_provider.R;
 
 public class Activity_WifiServer extends Activity implements Button.OnClickListener{
-private Button OpenSocket, Localhost;
+private Button Localhost;
 private TextView Text;	
 private WifiManager wifi_m;
 private Intent i = null;
@@ -22,13 +22,13 @@ private Intent i = null;
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.activity_wifiserver);
-	    OpenSocket = (Button)findViewById(R.id.b_OpenSocket);
 	    Localhost = (Button)findViewById(R.id.b_Localhost);
 	    Localhost.setOnClickListener(this);
-//	    OpenSocket.setOnClickListener(this);
+	    //OpenSocket.setOnClickListener(this);
 	    Text = (TextView)findViewById(R.id.textView1);
 	    i = new Intent(this, Service_WifiAdmin.class);
 	    startService(i);
+	    // TODO Auto-generated method stub
 	}
 
 
@@ -36,18 +36,9 @@ private Intent i = null;
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		
-		if(v.equals(OpenSocket)){
-			Text.setText("starting Socket");
-			//Socket_AsyncTask task = new Socket_AsyncTask(this, Text);
-			//task.execute();
-			Text.setText("Socket started");
-		}
-		else{
 			Log.i("There","LocalhostConnection");
 			Intent i = new Intent(this,Activity_ServerGame.class);
 			startActivity(i);
-		}
-		
 	}
 	
 	@Override
