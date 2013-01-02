@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 
 import at.itp.uno.data.ServerPlayer;
+import at.itp.uno.gamelogic.DummyPlayer;
 import at.itp.uno.gamelogic.GameTable;
 import at.itp.uno.network.SocketFactory;
 import at.itp.uno.network.UnexpectedPlayerResponseEception;
@@ -17,20 +19,25 @@ public class ServerLogic implements Runnable{
 
 	private ServerUI serverUI;
 	private ServerSocket serverSocket;
-	private SocketFactory socketFactory;
 	private LobbyAdminListener lobbyAdminListener;
 	private int port;
+	private boolean lobbyOpen;
 
 	private boolean gameStarted;
 
 	private GameTable gameTable;
 
-	public ServerLogic(SocketFactory socketFactory, int port, ServerUI serverUI){
+	public ServerLogic(SocketFactory socketFactory, int port, ServerUI serverUI) throws IOException{
+		this(socketFactory.createServerSocket(port), port, serverUI);
+	}
+
+	public ServerLogic(ServerSocket serverSocket, int port, ServerUI serverUI){
 		this.serverUI=serverUI;
-		this.socketFactory=socketFactory;
 		this.port=port;
+		this.serverSocket = serverSocket;
 
 		gameStarted = false;
+		lobbyOpen = false;
 
 		gameTable = new GameTable(serverUI);
 	}
@@ -51,6 +58,7 @@ public class ServerLogic implements Runnable{
 		//Open server, gather players
 		lobbySetup();
 		if(gameStarted){
+			gameTable.startGame();
 			//Set up table and players
 			gameTable.setUpGame();
 			//Do game stuff
@@ -74,12 +82,13 @@ public class ServerLogic implements Runnable{
 	 */
 	private void lobbySetup(){
 		serverUI.showMessage("Starting lobby setup");
+		lobbyOpen = true;
 		try {
-			serverSocket = socketFactory.createServerSocket(port);
-			serverUI.showMessage("Waiting for admin connection");
-			lobbyAdminListener = new LobbyAdminListener(this, new UnoSocketWrapper(serverSocket.accept(), 0));
-			new Thread(lobbyAdminListener).start();
-			serverUI.showMessage("Admin connected");
+			//serverSocket = socketFactory.createServerSocket(port);
+			//			serverUI.showMessage("Waiting for admin connection");
+			//			lobbyAdminListener = new LobbyAdminListener(this, new UnoSocketWrapper(serverSocket.accept(), 0));
+			//			new Thread(lobbyAdminListener).start();
+			//			serverUI.showMessage("Admin connected");
 			int cid = 1;
 			while(!serverSocket.isClosed()){
 				try{
@@ -101,16 +110,17 @@ public class ServerLogic implements Runnable{
 					startGame();
 				}
 			}
-			lobbyAdminListener.closeSocket();
+			//lobbyAdminListener.closeSocket();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		lobbyOpen = false;
 	}
 
 	public void startGame() {
 		serverUI.showMessage("Lobby closing, game starting");
-		closeServerSocket();
 		gameStarted = true;
+		closeServerSocket();
 	}
 
 	public boolean kickPlayer(int playerID) {
@@ -120,11 +130,14 @@ public class ServerLogic implements Runnable{
 	}
 
 	public void closeLobby() {
-		closeServerSocket();
-		synchronized(gameTable){
-			gameTable.closeTable();
+		if(lobbyOpen){
+			closeServerSocket();
+			synchronized(gameTable){
+				gameTable.closeTable();
+			}
+			gameStarted = false;
+			lobbyOpen = false;
 		}
-		gameStarted = false;
 	}
 
 	/////////////
@@ -225,6 +238,19 @@ public class ServerLogic implements Runnable{
 			gameTable.endTurn();
 		}
 		gameTable.endGame();
+	}
+
+	public void addDebugPlayers() {
+		new DummyPlayer(port);
+		new DummyPlayer(port);
+	}
+
+	public void retainPlayers(ArrayList<String> checkedPlayers) {
+		gameTable.retainPlayers(checkedPlayers);
+	}
+
+	public boolean isLobbyOpen() {
+		return lobbyOpen;
 	}
 }
 

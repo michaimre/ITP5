@@ -36,6 +36,7 @@
 
         <activity android:name="at.itp.uno.activity.Activity_ClientGame" />
         <activity android:name="at.itp.uno.activity.Activity_ServerGame" />
+        <activity android:name="at.itp.uno.activity.Activity_Lobby"></activity>
     </application>
 
 </manifest>

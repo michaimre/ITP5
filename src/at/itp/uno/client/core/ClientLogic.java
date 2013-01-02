@@ -1,9 +1,13 @@
 package at.itp.uno.client.core;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Socket;
 import java.util.LinkedList;
 
+import android.test.IsolatedContext;
+import at.itp.uno.client.ClientGameUI;
+import at.itp.uno.client.ClientLobbyUI;
 import at.itp.uno.client.ClientUI;
 import at.itp.uno.data.Card;
 import at.itp.uno.data.ClientPlayer;
@@ -13,13 +17,17 @@ import at.itp.uno.network.UnoSocketWrapper;
 import at.itp.uno.network.protocol.ProtocolMessages;
 import at.itp.uno.server.core.UnoServer;
 
-public class ClientLogic extends PlayerActionHandler implements Runnable{
+public class ClientLogic extends PlayerActionHandler implements Runnable, Serializable{
+
+	private static final long serialVersionUID = 7853653519504543217L;
 
 	private static final long ACTIONSLEEPTIME = 60*1000;
+	
+	private static ClientLogic INSTANCE;
 
 	private String host;
 	private int port;
-	private boolean gameStarted;
+	private boolean gameStarted, myTurn, validPlay, listening;
 	private Thread logicThread;
 	private UnoServer unoServer; 
 	private ClientLobbyAdmin clientLobbyAdmin;
@@ -29,15 +37,50 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 	private Card topCard;
 	private LinkedList<ClientPlayer> otherPlayers;
 
-	public ClientLogic(ClientUI clientUI){
-		super(clientUI);
+	private ClientLobbyUI clientLobbyUI;
+	private ClientGameUI clientGameUI;
+	private ClientUI clientUI;
+	
+	public static ClientLogic getInstance(){
+		if(INSTANCE == null){
+			INSTANCE = new ClientLogic();
+		}
+		return INSTANCE;
+	}
+	
+	public static ClientLogic getDummyLogic(){
+		return new ClientLogic();
+	}
+
+	protected ClientLogic(){
+		super();
 		this.host = "";
 		this.port = 0;
 		otherPlayers = new LinkedList<ClientPlayer>();
 		hand = new HandCards();
+		myTurn = Boolean.FALSE;
 		gameStarted = Boolean.FALSE;
+		validPlay = Boolean.FALSE;
 		topCard = new Card((short)0);
 		logicThread = new Thread(this);
+	}
+
+	public ClientGameUI getClientGameUI() {
+		return clientGameUI;
+	}
+
+	public void setClientGameUI(ClientGameUI clientGameUI) {
+		this.clientGameUI = clientGameUI;
+		this.clientUI = this.clientGameUI;
+	}
+
+	public ClientLobbyUI getClientLobbyUI() {
+		return clientLobbyUI;
+	}
+
+	public void setClientLobbyUI(ClientLobbyUI clientLobbyUI) {
+		this.clientLobbyUI = clientLobbyUI;
+		this.clientUI = this.clientLobbyUI;
 	}
 
 	@Override
@@ -47,7 +90,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 		logicThread.start();
 		return true;
 	}
-	
+
 	@Override
 	public boolean openNewGameLobby(){
 		//TODO server port is here!
@@ -64,7 +107,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void startGame(){
 		clientLobbyAdmin.sendStartCommand();
@@ -91,11 +134,11 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 		clientUI.showDebug("Lobby loop start");
 		//TODO playername here!
 		String playername = "Player";
-		boolean listening = Boolean.TRUE;
+		listening = Boolean.TRUE;
 		try {
 			//TODO timeout set to 0 while in lobby
 			self = new ClientPlayer(new UnoSocketWrapper(new Socket(host, port), 0), playername);
-			clientUI.playerJoined(self);
+			clientLobbyUI.playerJoined(self);
 			clientUI.showDebug("Self is: "+self.getId()+" ,"+self.getName());
 			while(listening){
 				clientUI.showDebug("Listening...");
@@ -113,12 +156,23 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 				case ProtocolMessages.LM_PLAYERJOINED:
 					playerJoined(self.getSocket().read());
 					break;
+					
+				case ProtocolMessages.GM_PLAYERDROPPED:
+					playerDropped(self.getSocket().read());
+					break;
 
 				case ProtocolMessages.LM_START:
 					clientUI.showDebug("Game starting");
 					gameStarted = Boolean.TRUE;
 					listening = Boolean.FALSE;
-					clientUI.gameStarting();
+					clientLobbyUI.gameStarting();
+					break;
+					
+				case ProtocolMessages.GM_GAMECLOSING:
+					clientLobbyUI.gameClosing();
+					self.getSocket().close();
+					listening = false;
+					gameStarted = false;
 					break;
 
 				default:
@@ -135,6 +189,13 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 
 	private void gameLoop() {
 		clientUI.showDebug("Game loop start");
+		while(clientGameUI == null){
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		try {
 			while(true){
 				clientUI.showDebug("Listening...");
@@ -168,21 +229,32 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 		ClientPlayer aPlayer = new ClientPlayer(playerid);
 		aPlayer.setName(self.getSocket().readString());
 		otherPlayers.add(aPlayer);
-		clientUI.playerJoined(aPlayer);
+		clientLobbyUI.playerJoined(aPlayer);
 		clientUI.showDebug("Player joined: "+aPlayer.getId()+", "+aPlayer.getName());
+	}
+
+	private void playerDropped(int playerid) throws IOException{
+		for(ClientPlayer p:otherPlayers){
+			if(p.getId() == playerid){
+				clientLobbyUI.playerDropped(p);
+				clientUI.showDebug("Player dropped: "+p.getId()+", "+p.getName());
+				otherPlayers.remove(p);
+				break;
+			}
+		}
 	}
 
 	private void receiveCard() throws IOException {
 		Card card = new Card((short) self.getSocket().read());
 		clientUI.showDebug("Receive card: "+card.toString());
-		clientUI.receivedCard(card);
+		clientGameUI.receivedCard(card);
 		hand.addCard(card);
 	}
 
 	private void receiveTopCard() throws IOException {
 		Card card = new Card((short) self.getSocket().read());
 		clientUI.showDebug("Receive top card: "+card.toString());
-		clientUI.receivedTopCard(card);
+		clientGameUI.receivedTopCard(card);
 		topCard = card;
 	}
 
@@ -191,28 +263,31 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 		clientUI.showDebug("Start turn, id: "+nextPlayerID);
 		if(nextPlayerID == self.getId()){
 			clientUI.showDebug("My turn");
-			clientUI.startTurn(Boolean.TRUE);
+			clientGameUI.startTurn(Boolean.TRUE);
 			doAction();
 		}
 		else{
 			clientUI.showDebug("Not my turn");
-			clientUI.startTurn(Boolean.FALSE);
+			clientGameUI.startTurn(Boolean.FALSE);
 		}
 	}
 
 	private void doAction() throws IOException{
 		clientUI.showDebug("Do action");
-		clientUI.doAction();
-		clientUI.showDebug("Going to sleep while waiting for user input");
-		try {
-			Thread.sleep(ACTIONSLEEPTIME);
-		} catch (InterruptedException e) {
-			//intended -> player did something
-			clientUI.showDebug("bzzzt interrupt");
-		}
+		validPlay = false;
+		do{
+			clientGameUI.doAction();
+			clientUI.showDebug("Going to sleep while waiting for user input");
+			try {
+				Thread.sleep(ACTIONSLEEPTIME);
+			} catch (InterruptedException e) {
+				//intended -> player did something
+				clientUI.showDebug("bzzzt interrupt");
+			}
+		}while(!validPlay);
 		//skip player - end turn
-		
-		
+
+
 		/*
 		 * old code -> moved to interface methods
 		 * 
@@ -237,7 +312,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 			//end turn
 			break;
 		}
-		*/
+		 */
 	}
 
 	/*
@@ -259,30 +334,34 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 		clientUI.callUno();
 		self.getSocket().write(ProtocolMessages.GTM_CALLUNO);
 	}
-	*/
+	 */
 
 	@Override
-	public void playCard(Card card) throws IOException {
+	public boolean playCard(Card card) throws IOException {
 		clientUI.showDebug("Playing card: "+card.toString());
-		clientUI.playCard(card);
+		clientGameUI.playCard(card);
 		self.getSocket().write(ProtocolMessages.GTM_PLAYCARD);
 		self.getSocket().write(card.getFace());
+		validPlay = (self.getSocket().read() == ProtocolMessages.GTM_VALIDPLAY);
 		logicThread.interrupt();
+		return validPlay;
 	}
 
 	@Override
 	public void drawCard() throws IOException {
 		clientUI.showDebug("Drawing card");
-		clientUI.drawCard();
+		clientGameUI.drawCard();
 		self.getSocket().write(ProtocolMessages.GTM_DRAWCARD);
+		validPlay = true;
 		logicThread.interrupt();
 	}
 
 	@Override
 	public void callUno() throws IOException {
 		clientUI.showDebug("Drawing card");
-		clientUI.drawCard();
+		clientGameUI.drawCard();
 		self.getSocket().write(ProtocolMessages.GTM_DRAWCARD);
+		validPlay = true;
 		logicThread.interrupt();
 	}
 
@@ -291,5 +370,4 @@ public class ClientLogic extends PlayerActionHandler implements Runnable{
 		// TODO Auto-generated method stub
 
 	}
-
 }

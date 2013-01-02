@@ -150,8 +150,6 @@ public class ServerPlayer extends Player{
 	}
 
 	public void sendPlayedCardResult(boolean validAction) throws IOException {
-		socket.write(ProtocolMessages.GTM_PLAYRESULT);
 		socket.write((validAction)?ProtocolMessages.GTM_VALIDPLAY:ProtocolMessages.GTM_INVALIDPLAY);
 	}
-
 }

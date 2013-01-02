@@ -1,6 +1,7 @@
 package at.itp.uno.gamelogic;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -308,9 +309,11 @@ public class GameTable {
 
 	public boolean playCardAction(ServerPlayer currentPlayer) throws IOException {
 		boolean validPlay = false;
-		broadcastMessage(ProtocolMessages.GTM_PLAYCARD, currentPlayer);
 		validPlay = resolveAction(currentPlayer.getPlayedCard());
 		currentPlayer.sendPlayedCardResult(validPlay);
+		if(validPlay){
+			broadcastMessage(ProtocolMessages.GTM_PLAYCARD, currentPlayer);
+		}
 		return validPlay;
 	}
 
@@ -389,6 +392,27 @@ public class GameTable {
 			}
 			catch(IOException ioe){
 				playerDisconnected(p);
+			}
+		}
+	}
+
+	public void retainPlayers(ArrayList<String> checkedPlayers) {
+		LinkedList<Integer> playersToKick = new LinkedList<Integer>();
+		for(ServerPlayer p:players){
+			if(!checkedPlayers.contains(p.getName()))
+				playersToKick.add(p.getId());
+		}
+		for(Integer i:playersToKick){
+			kickPlayer(i);
+		}
+	}
+
+	public void startGame() {
+		for(ServerPlayer p:players){
+			try {
+				p.startGame();
+			} catch (IOException e) {
+				kickPlayer(p.getId());
 			}
 		}
 	}

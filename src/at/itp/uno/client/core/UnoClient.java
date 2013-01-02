@@ -20,7 +20,7 @@ public class UnoClient {
 	public UnoClient(ClientUI clientUI){
 		this.clientUI = clientUI;
 		this.clientLobbyAdmin = new ClientLobbyAdmin(clientUI);
-		this.clientLogic = new ClientLogic(clientUI);
+//		this.clientLogic = new ClientLogic(clientUI);
 	}
 
 	public ClientLogic getClientLogic() {
