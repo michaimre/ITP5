@@ -3,7 +3,10 @@ package at.itp.uno.activity;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,6 +57,10 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 				
 			case ProtocolMessages.GM_PLAYERDROPPED:
 				handlePlayerDropped((ClientPlayer)msg.getData().getSerializable("player"));
+				break;
+				
+			case ProtocolMessages.LM_START:
+				handleGameStarting();
 				break;
 				
 				default:
@@ -189,8 +196,9 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 
 	@Override
 	public void gameStarting() {
-		// TODO Auto-generated method stub
-
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.LM_START;
+		handler.sendMessage(msg);
 	}
 	
 	@Override
@@ -218,8 +226,8 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 	}
 
 	public void handleGameStarting() {
-		// TODO Auto-generated method stub
-
+		Intent i = new Intent(this,Activity_ServerGame.class);
+		startActivity(i);
 	}
 	
 	public void handlePlayerDropped(ClientPlayer aPlayer) {

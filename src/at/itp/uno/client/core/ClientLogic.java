@@ -158,7 +158,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		listening = Boolean.TRUE;
 		try {
 			//TODO timeout set to 0 while in lobby
-			if(activity!=null){
+			if(activity!=null && host.compareToIgnoreCase("localhost")!=0){
 				ConnectivityManager cm =(ConnectivityManager)activity.getSystemService(Context.CONNECTIVITY_SERVICE);
 				NetworkInfo netInfo = null;
 				do{
