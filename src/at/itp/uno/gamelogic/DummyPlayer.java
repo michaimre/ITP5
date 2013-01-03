@@ -65,9 +65,9 @@ public class DummyPlayer extends Thread implements ClientLobbyUI, ClientGameUI{
 	}
 
 	@Override
-	public void startTurn(boolean ownTurn) {
+	public void startTurn(boolean ownTurn, int playerId) {
 		// TODO Auto-generated method stub
-		Log.d("UNO Dummy"+myid, ""+ownTurn);
+		Log.d("UNO Dummy"+myid, ""+ownTurn+", "+playerId);
 	}
 
 	@Override

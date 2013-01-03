@@ -7,7 +7,7 @@ public interface ClientGameUI extends ClientUI{
 
 	public void receivedCard(Card card);
 	public void receivedTopCard(Card card);
-	public void startTurn(boolean ownTurn);
+	public void startTurn(boolean ownTurn, int playerId);
 	public void doAction();
 	public void playCard(Card card);
 	public void drawCard();

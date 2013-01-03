@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import android.util.Log;
 import at.itp.uno.data.Card;
 import at.itp.uno.data.CardFaces;
 import at.itp.uno.data.Deck;
@@ -225,14 +226,13 @@ public class GameTable {
 	}
 
 	public boolean resolveAction(Card playedCard) throws IOException{
-		//TODO
 		if((wildColor<0 && playedCard.getColor() == topCard.getColor()) || playedCard.getColor()==wildColor){
-			if(cardsToDraw>0 && playedCard.getFace()==CardFaces.DRAWTWO){
+			if(cardsToDraw>0 && playedCard.getValue()==CardFaces.DRAWTWO){
 				cardsToDraw+=2;
 				changeTopCard(playedCard);
 			}
 			else{
-				switch(playedCard.getFace()){
+				switch(playedCard.getValue()){
 				case CardFaces.ONE: case CardFaces.TWO: case CardFaces.THREE: case CardFaces.FOUR: case CardFaces.FIVE: case CardFaces.SIX: case CardFaces.SEVEN: case CardFaces.EIGHT: case CardFaces.NINE: case CardFaces.ZERO:
 					changeTopCard(playedCard);
 					return true;
@@ -245,23 +245,23 @@ public class GameTable {
 				case CardFaces.DRAWTWO:
 					cardsToDraw+=2;
 					changeTopCard(playedCard);
-					break;
+					return true;
 
 				case CardFaces.REVERSE:
 					rotateForward = !rotateForward;
 					changeTopCard(playedCard);
-					break;
+					return true;
 
 				case CardFaces.WILD:
 					setWildColor();
 					changeTopCard(playedCard);
-					break;
+					return true;
 
 				case CardFaces.WILDFOUR:
 					cardsToDraw+=4;
 					setWildColor();
 					changeTopCard(playedCard);
-					break;
+					return true;
 				}
 			}
 		}
@@ -310,6 +310,7 @@ public class GameTable {
 	public boolean playCardAction(ServerPlayer currentPlayer) throws IOException {
 		boolean validPlay = false;
 		validPlay = resolveAction(currentPlayer.getPlayedCard());
+		Log.d("UNO Server", "valid play: "+validPlay);
 		currentPlayer.sendPlayedCardResult(validPlay);
 		if(validPlay){
 			broadcastMessage(ProtocolMessages.GTM_PLAYCARD, currentPlayer);

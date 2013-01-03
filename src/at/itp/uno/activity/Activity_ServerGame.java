@@ -1,12 +1,13 @@
 package at.itp.uno.activity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,16 +17,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import at.itp.uno.client.ClientGameUI;
 import at.itp.uno.client.core.ClientLogic;
 import at.itp.uno.data.Card;
-import at.itp.uno.data.CardFaces;
 import at.itp.uno.data.CardToResourceId;
 import at.itp.uno.data.ClientPlayer;
 import at.itp.uno.network.protocol.ProtocolMessages;
-import at.itp.uno.wifi.Client_AsyncTask;
 import at.itp.uno.wifi.ServiceConnection_Service_WifiAdmin;
-import at.itp.uno.wifi.Service_WifiAdmin;
 import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
 import at.itp_uno_wifi_provider.R;
 
@@ -36,18 +35,22 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private ServiceConnection_Service_WifiAdmin connection = null;
 	private EditText et_broadcastMessage;
 
-	private List<Card> cardsList = new ArrayList();
+	private List<Card> cardsList;
 	private CardToResourceId cdti;
 	private LinearLayout horizontalLayout, stapelLayout;
-	
+
 	private LinearLayout.LayoutParams layoutParams;
 	private Random randomGenerator = new Random();
 	private ImageView stapel_ab;
 	private ImageView stapel_hin;
 	private ImageView mischen; 
-	
+	private ImageView uno; 
+	private ImageView[] playerTurns;
+	private TextView[] playerNames;
+
 	private ClientLogic clientLogic;
-	
+	private boolean myTurn;
+
 	/** Handles UI updates
 	 *  Receives messages from the logic thread
 	 */
@@ -55,54 +58,85 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		@Override
 		public void handleMessage(Message msg) {
 			switch(msg.arg1){
-			
-				
-				default:
-					break;
+			case ProtocolMessages.GTM_TOPCARD:
+				handleReceivedTopCard((Card)msg.getData().getSerializable("card"));
+				break;
+
+			case ProtocolMessages.GTM_DEALCARD:
+				handleReceivedCard((Card)msg.getData().getSerializable("card"));
+				break;
+
+			case ProtocolMessages.GTM_STARTTURN:
+				handleStartTurn(msg.getData().getBoolean("myturn"), msg.getData().getInt("pid"));
+				break;
+
+			default:
+				break;
 			}
 		}
 	};
-	
-	
+
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.activity_servergame);
-//		b_sendBroadcast = (Button) findViewById(R.id.b_sendBroadcast);
+		//		b_sendBroadcast = (Button) findViewById(R.id.b_sendBroadcast);
 		// et_broadcastMessage = (EditText)findViewById(R.id.et_Message);
-//		b_sendBroadcast.setOnClickListener(this);
-		
+		//		b_sendBroadcast.setOnClickListener(this);
+
+		cardsList = new ArrayList<Card>();
+		myTurn = false;
+
 		clientLogic = ClientLogic.getInstance();
 		clientLogic.setClientGameUI(this);
 
 		cdti = new CardToResourceId();
-		
+
+		playerTurns = new ImageView[4];
+		playerNames = new TextView[4];
+
+		playerTurns[0] = (ImageView)findViewById(R.id.iv_spieler1_turn);
+		playerTurns[1] = (ImageView)findViewById(R.id.iv_spieler2_turn);
+		playerTurns[2] = (ImageView)findViewById(R.id.iv_spieler3_turn);
+		playerTurns[3] = (ImageView)findViewById(R.id.iv_spieler4_turn);
+
+		playerNames[0] = (TextView)findViewById(R.id.tv_spieler1_name);
+		playerNames[1] = (TextView)findViewById(R.id.tv_spieler2_name);
+		playerNames[2] = (TextView)findViewById(R.id.tv_spieler3_name);
+		playerNames[3] = (TextView)findViewById(R.id.tv_spieler4_name);
+
+		for(int i=0;i<4;i++){
+			playerTurns[i].setVisibility(ImageView.INVISIBLE);
+			playerNames[i].setText("---");
+		}
+		playerNames[0].setText(clientLogic.getSelf().getName());
+		for(int i=0;i<clientLogic.getOtherPlayers().size();i++){
+			playerNames[i+1].setText(clientLogic.getOtherPlayers().get(i).getName());
+		}
+
 		stapel_ab = (ImageView) findViewById(R.id.imageView_stapel_ab);
 		stapel_hin = (ImageView) findViewById(R.id.imageView_stapel_hin);
 		mischen = (ImageView) findViewById(R.id.imageView_mischen);
-		
+		uno = (ImageView) findViewById(R.id.imageView_uno);
+
 		stapel_ab.setOnClickListener(this);
 		stapel_hin.setOnClickListener(this);
 		mischen.setOnClickListener(this);
-		
+		uno.setOnClickListener(this);
+
 		horizontalLayout = (LinearLayout) findViewById(R.id.scrollViewLinearLayout);
 		stapelLayout = (LinearLayout) findViewById(R.id.linearLayout_stapel);
 		horizontalLayout.setOnClickListener(this);
-		
-		cardsList.add(new Card((short) CardFaces.BLUE, (short) 1));
-		cardsList.add(new Card((short) 0, (short) 14));
-		cardsList.add(new Card((short) CardFaces.YELLOW, (short) 7));
-		cardsList.add(new Card((short) CardFaces.RED, (short) 9));
-		cardsList.add(new Card((short) CardFaces.GREEN, (short) 11));
 
 		stapel_hin.measure(View.MeasureSpec.makeMeasureSpec(0, 0),
 				View.MeasureSpec.makeMeasureSpec(0, 0));
 
 		layoutParams = new LinearLayout.LayoutParams(new Double(
 				0.60 * stapel_hin.getMeasuredWidth()).intValue(), new Double(
-				0.60 * stapel_hin.getMeasuredHeight()).intValue());
-		
+						0.60 * stapel_hin.getMeasuredHeight()).intValue());
+
 		stapel_ab.setLayoutParams(layoutParams);
 		stapel_hin.setLayoutParams(layoutParams);
 		drawCardsOnScrollView(cardsList);
@@ -114,14 +148,26 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		// _service.sendTestBroadcast(et_broadcastMessage.getText().toString());
 		// }
 
-		int j = horizontalLayout.indexOfChild(v);
-
-		if (v.equals(stapel_ab)) {
-			addCardToHand();
-		} else if (v.equals(mischen)) {
-			sortCards(cardsList);
-		} else {
-			removeCardFromHand(j);
+		if(myTurn){
+			try {
+				if (v.equals(stapel_ab)) {
+					clientLogic.drawCard();
+				} else if(v.equals(uno)){
+					clientLogic.callUno();
+				} else {
+					int j = horizontalLayout.indexOfChild(v);
+					if(clientLogic.playCard(cardsList.get(j))){
+						removeCardFromHand(j);
+					}
+					else{
+						//TODO fancy invalid play notification
+						Log.d("UNO Game", "invalid card");
+					}
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -166,15 +212,16 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		}
 	}
 
-	private void addCardToHand() {
-		Card localCard = randomCard();
-		cardsList.add(localCard);
-		drawCardsOnScrollView(localCard);
+	private void addCardToHand(Card card) {
+		//		Card localCard = randomCard();
+		cardsList.add(card);
+		sortCards(cardsList);
+		drawCardsOnScrollView(card);
 	}
 
 	private void removeCardFromHand(int cardId) {
 		horizontalLayout.removeViewAt(cardId);
-		stapel_hin.setImageResource(cdti.getResourceId(cardsList.get(cardId)));
+		//stapel_hin.setImageResource(cdti.getResourceId(cardsList.get(cardId)));
 		cardsList.remove(cardId);
 	}
 
@@ -193,6 +240,14 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 				(short) this.randomGenerator.nextInt(14));
 	}
 
+	private void setMyTurn(boolean ownTurn) {
+		this.myTurn = ownTurn;
+	}
+
+	/////
+	//Logic callbacks
+	/////
+
 	@Override
 	public void showMessage(String message) {
 		Log.d("UNO Game", message);
@@ -210,43 +265,108 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	@Override
 	public void receivedCard(Card card) {
-		// TODO Auto-generated method stub
-		
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.GTM_DEALCARD;
+		msg.getData().putSerializable("card", card);
+		handler.sendMessage(msg);
 	}
 
 	@Override
 	public void receivedTopCard(Card card) {
-		// TODO Auto-generated method stub
-		
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.GTM_TOPCARD;
+		msg.getData().putSerializable("card", card);
+		handler.sendMessage(msg);
 	}
 
 	@Override
-	public void startTurn(boolean ownTurn) {
-		// TODO Auto-generated method stub
-		
+	public void startTurn(boolean ownTurn, int playerId) {
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.GTM_STARTTURN;
+		msg.getData().putBoolean("myturn", ownTurn);
+		msg.getData().putInt("pid", playerId);
+		handler.sendMessage(msg);
 	}
 
 	@Override
 	public void doAction() {
-		// TODO Auto-generated method stub
-		
+		//TODO fancy "your turn" animation
+		Log.d("UNO Game", "doaction");
 	}
 
 	@Override
 	public void playCard(Card card) {
-		// TODO Auto-generated method stub
-		
+		//TODO fancy "card played" animation"
+		Log.d("UNO Game", "playcard");
 	}
 
 	@Override
 	public void drawCard() {
-		// TODO Auto-generated method stub
-		
+		//TODO fancy "draw card" animation
+		Log.d("UNO Game", "drawcard");
 	}
 
 	@Override
 	public void callUno() {
+		//TODO fancy "uno called" animation
+		Log.d("UNO Game", "calluno");
+	}
+
+	/////
+	//Handler methods
+	/////
+
+	public void handleReceivedCard(Card card) {
+		//		cardsList.add(card);
+		//		sortCards(cardsList);
+		//		redrawCardsOnScrollView(cardsList);
+		addCardToHand(card);
+	}
+
+	public void handleReceivedTopCard(Card card) {
+		stapel_hin.setImageResource(cdti.getResourceId(card));
+	}
+
+	public void handleStartTurn(boolean ownTurn, int playerId) {
+		setMyTurn(ownTurn);
+		for(int i=0;i<4;i++){
+			playerTurns[i].setVisibility(ImageView.INVISIBLE);
+		}
+		if(ownTurn){
+			playerTurns[0].setVisibility(ImageView.VISIBLE);
+		}
+		else{
+			for(ClientPlayer cp:clientLogic.getOtherPlayers()){
+				if(cp.getId() == playerId){
+					for(int i=0;i<4;i++){
+						if(playerNames[i+1].getText().toString().compareToIgnoreCase(cp.getName()) == 0){
+							playerTurns[i+1].setVisibility(ImageView.VISIBLE);
+							break;
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	public void handleDoAction() {
 		// TODO Auto-generated method stub
-		
+		Log.d("UNO Game", "doaction");
+	}
+
+	public void handlePlayCard(Card card) {
+		// TODO Auto-generated method stub
+		Log.d("UNO Game", "playcard");
+	}
+
+	public void handleDrawCard() {
+		// TODO Auto-generated method stub
+		Log.d("UNO Game", "drawcard");
+	}
+
+	public void handleCallUno() {
+		// TODO Auto-generated method stub
+		Log.d("UNO Game", "calluno");
 	}
 }

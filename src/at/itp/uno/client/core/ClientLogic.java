@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.util.LinkedList;
 
-import android.test.IsolatedContext;
 import at.itp.uno.client.ClientGameUI;
 import at.itp.uno.client.ClientLobbyUI;
 import at.itp.uno.client.ClientUI;
@@ -81,6 +80,15 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 	public void setClientLobbyUI(ClientLobbyUI clientLobbyUI) {
 		this.clientLobbyUI = clientLobbyUI;
 		this.clientUI = this.clientLobbyUI;
+	}
+
+	@SuppressWarnings("unchecked")
+	public LinkedList<ClientPlayer> getOtherPlayers() {
+		return (LinkedList<ClientPlayer>)otherPlayers.clone();
+	}
+
+	public ClientPlayer getSelf() {
+		return self;
 	}
 
 	@Override
@@ -263,12 +271,12 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		clientUI.showDebug("Start turn, id: "+nextPlayerID);
 		if(nextPlayerID == self.getId()){
 			clientUI.showDebug("My turn");
-			clientGameUI.startTurn(Boolean.TRUE);
+			clientGameUI.startTurn(Boolean.TRUE, nextPlayerID);
 			doAction();
 		}
 		else{
 			clientUI.showDebug("Not my turn");
-			clientGameUI.startTurn(Boolean.FALSE);
+			clientGameUI.startTurn(Boolean.FALSE, nextPlayerID);
 		}
 	}
 
@@ -358,9 +366,9 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 
 	@Override
 	public void callUno() throws IOException {
-		clientUI.showDebug("Drawing card");
-		clientGameUI.drawCard();
-		self.getSocket().write(ProtocolMessages.GTM_DRAWCARD);
+		clientUI.showDebug("Calling uno");
+		clientGameUI.callUno();
+		self.getSocket().write(ProtocolMessages.GTM_CALLUNO);
 		validPlay = true;
 		logicThread.interrupt();
 	}

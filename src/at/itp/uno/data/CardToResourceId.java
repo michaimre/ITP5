@@ -5,27 +5,36 @@ import at.itp_uno_wifi_provider.R;
 public class CardToResourceId {
 
 	public int getResourceId(Card paramCard) {
-		if (paramCard.getColor() == 0)
+		if (paramCard.getColor() == 0){
 			return getBlackCardRId(paramCard.getValue());
-		else if (paramCard.getColor() == CardFaces.RED)
+		}
+		else if (paramCard.getColor() == CardFaces.RED){
 			return getRedCardRId(paramCard.getValue());
-		else if (paramCard.getColor() == CardFaces.GREEN)
+		}
+		else if (paramCard.getColor() == CardFaces.GREEN){
 			return getGreenCardRId(paramCard.getValue());
-		else if (paramCard.getColor() == CardFaces.BLUE)
+		}
+		else if (paramCard.getColor() == CardFaces.BLUE){
 			return getBlueCardRId(paramCard.getValue());
-		else if (paramCard.getColor() == CardFaces.YELLOW)
+		}
+		else if (paramCard.getColor() == CardFaces.YELLOW){
 			return getYellowCardRId(paramCard.getValue());
-		else
+		}
+		else{
 			return R.drawable.schwarz_rueckseite;
+		}
 	}
 
 	private int getBlackCardRId(short cardId) {
-		if (cardId == CardFaces.WILD)
+		if (cardId == CardFaces.WILD){
 			return R.drawable.schwarz_farbenwechsel;
-		if (cardId == CardFaces.WILDFOUR)
+		}
+		if (cardId == CardFaces.WILDFOUR){
 			return R.drawable.schwarz_plusvier;
-		else
+		}
+		else{
 			return R.drawable.schwarz_rueckseite;
+		}
 	}
 
 	private int getBlueCardRId(short cardId) {

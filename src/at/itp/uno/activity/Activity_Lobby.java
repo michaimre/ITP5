@@ -82,6 +82,8 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 		clientLogic = ClientLogic.getInstance();
 		clientLogic.setClientLobbyUI(this);
 		
+//		clientLogic.getSelf().setName("Hugo");
+		
 		if(_listItemStyle == android.R.layout.simple_list_item_multiple_choice){
 			lv_players.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 			clientLogic.joinGame("localhost", 30600);
@@ -91,7 +93,7 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 			b_main.setVisibility(Button.INVISIBLE);
 			//b_debug.setVisibility(Button.INVISIBLE);
 			lv_players.setChoiceMode(ListView.CHOICE_MODE_NONE);
-			//clientLogic.joinGame(host, 30600);
+			clientLogic.joinGame(getIntent().getExtras().getString("AccessPointIP"), 30600);
 		}
 		adapterPlayers = new ListViewAdapterPlayers (Activity_Lobby.this, _listItemStyle , _spieler);
 		lv_players.setAdapter(adapterPlayers);

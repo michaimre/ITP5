@@ -39,8 +39,6 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
         }
         
         wifi_m.createWifiLock(1, "WifiLock");
-        
-        
     }
 
 
@@ -75,10 +73,14 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 		Log.d("WifiPreference", "add Network returned " + res );
 		Log.d("WifiPreference", "enableNetwork returned " + networkEnabled );
 		Log.d("WifiPreference", "enableNetwork returned " + wifi_m.getConnectionInfo().toString());
-		Log.d("WifiPreference", "enableNetwork returned " + wifi_m.getDhcpInfo());
+		Log.d("WifiPreference", "enableNetwork returned " + this.intToIp(wifi_m.getDhcpInfo().gateway));
 		Log.d("WifiPreference", "enableNetwork returned " + wifi_m.pingSupplicant());
+
+		//TODO IP HERE
 		if(networkEnabled){
-			Intent i = new Intent(this,Activity_ClientGame.class);
+			Intent i = new Intent(this, Activity_Lobby.class);
+			i.putExtra("AccessPointIP", this.intToIp(wifi_m.getDhcpInfo().gateway));
+			i.putExtra("textViewResourceId", android.R.layout.simple_list_item_1);
 			startActivity(i);
 		}
 	}
@@ -102,4 +104,9 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 		
 		
 	}
+	
+	public String intToIp(int i) {
+
+		   return  ( i & 0xFF) + "." + ((i >> 8 ) & 0xFF)   + "." +   ((i >> 16 ) & 0xFF) + "." + ((i >> 24 ) & 0xFF ) ;
+		}
 }
