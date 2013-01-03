@@ -279,7 +279,7 @@ public class GameTable {
 		topCard = newTopCard;
 		broadcastMessage(ProtocolMessages.GTM_TOPCARD, null);
 		broadcastMessage(topCard.getFace(), null);
-		wildColor = -1;
+		//wildColor = -1;
 	}
 
 	public void skipNextPlayer(){
@@ -288,6 +288,7 @@ public class GameTable {
 
 	public void setWildColor() throws IOException{
 		wildColor = (short)playerqueue.getFirst().getSocket().read();
+		Log.d("UNO Table", "wild color: "+wildColor);
 	}
 
 	public void forceDraw(ServerPlayer currentPlayer) throws IOException{

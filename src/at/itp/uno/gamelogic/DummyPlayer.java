@@ -77,6 +77,7 @@ public class DummyPlayer extends Thread implements ClientLobbyUI, ClientGameUI{
 		try {
 			for(Card c:cards){
 				if(clientLogic.playCard(c))
+					cards.remove(c);
 					return;
 			}
 			if(cards.size()==1)
