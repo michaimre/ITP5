@@ -195,7 +195,7 @@ public class GameTable {
 		if(topCard==null){
 			while(topCard==null){
 				topCard = deck.drawCard();
-				if(topCard.getValue()==14 || topCard.getValue()==15){
+				if(!(topCard.getValue() >= CardFaces.ONE && topCard.getValue() <= CardFaces.ZERO)){
 					deck.reshuffleCard(topCard);
 					topCard=null;
 				}
@@ -226,41 +226,48 @@ public class GameTable {
 	}
 
 	public boolean resolveAction(Card playedCard) throws IOException{
-		if((wildColor<0 && playedCard.getColor() == topCard.getColor()) || playedCard.getColor()==wildColor){
+		serverUI.showMessage("Resolving cards - played: "+playedCard.toString()+", top: "+topCard.toString()+", wildcolor: "+wildColor+", cardtodraw: "+cardsToDraw);
+		if((wildColor<0 && (playedCard.getColor() == 0 || playedCard.getColor() == topCard.getColor() || playedCard.getValue() == topCard.getValue())) || playedCard.getColor()==wildColor){
 			if(cardsToDraw>0 && playedCard.getValue()==CardFaces.DRAWTWO){
 				cardsToDraw+=2;
-				changeTopCard(playedCard);
+				wildColor = -1;
+				return true;
+				//changeTopCard(playedCard);
 			}
 			else{
 				switch(playedCard.getValue()){
 				case CardFaces.ONE: case CardFaces.TWO: case CardFaces.THREE: case CardFaces.FOUR: case CardFaces.FIVE: case CardFaces.SIX: case CardFaces.SEVEN: case CardFaces.EIGHT: case CardFaces.NINE: case CardFaces.ZERO:
-					changeTopCard(playedCard);
+					//changeTopCard(playedCard);
+					wildColor = -1;
 					return true;
 
 				case CardFaces.SKIP:
 					skipNextPlayer=true;
-					changeTopCard(playedCard);
+					wildColor = -1;
+					//changeTopCard(playedCard);
 					return true;
 
 				case CardFaces.DRAWTWO:
 					cardsToDraw+=2;
-					changeTopCard(playedCard);
+					wildColor = -1;
+					//changeTopCard(playedCard);
 					return true;
 
 				case CardFaces.REVERSE:
 					rotateForward = !rotateForward;
-					changeTopCard(playedCard);
+					wildColor = -1;
+					//changeTopCard(playedCard);
 					return true;
 
 				case CardFaces.WILD:
 					setWildColor();
-					changeTopCard(playedCard);
+					//changeTopCard(playedCard);
 					return true;
 
 				case CardFaces.WILDFOUR:
 					cardsToDraw+=4;
 					setWildColor();
-					changeTopCard(playedCard);
+					//changeTopCard(playedCard);
 					return true;
 				}
 			}
@@ -271,7 +278,7 @@ public class GameTable {
 	public void changeTopCard(Card newTopCard){
 		topCard = newTopCard;
 		broadcastMessage(ProtocolMessages.GTM_TOPCARD, null);
-		broadcastMessage(topCard.getValue(), null);
+		broadcastMessage(topCard.getFace(), null);
 		wildColor = -1;
 	}
 
@@ -309,11 +316,13 @@ public class GameTable {
 
 	public boolean playCardAction(ServerPlayer currentPlayer) throws IOException {
 		boolean validPlay = false;
-		validPlay = resolveAction(currentPlayer.getPlayedCard());
+		Card playedCard = currentPlayer.getPlayedCard();
+		validPlay = resolveAction(playedCard);
 		Log.d("UNO Server", "valid play: "+validPlay);
 		currentPlayer.sendPlayedCardResult(validPlay);
 		if(validPlay){
 			broadcastMessage(ProtocolMessages.GTM_PLAYCARD, currentPlayer);
+			changeTopCard(playedCard);
 		}
 		return validPlay;
 	}
@@ -414,6 +423,17 @@ public class GameTable {
 				p.startGame();
 			} catch (IOException e) {
 				kickPlayer(p.getId());
+			}
+		}
+	}
+
+	public void purge() {
+		while(players.size()>0){
+			try {
+				players.get(0).getSocket().close();
+			} catch (IOException e) {
+				Log.d("UNO Table", "purging table, don't mind this");
+				Log.e("UNO Table", e.getMessage());
 			}
 		}
 	}

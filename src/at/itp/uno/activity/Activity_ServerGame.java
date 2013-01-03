@@ -21,6 +21,7 @@ import android.widget.TextView;
 import at.itp.uno.client.ClientGameUI;
 import at.itp.uno.client.core.ClientLogic;
 import at.itp.uno.data.Card;
+import at.itp.uno.data.CardFaces;
 import at.itp.uno.data.CardToResourceId;
 import at.itp.uno.data.ClientPlayer;
 import at.itp.uno.network.protocol.ProtocolMessages;
@@ -29,6 +30,10 @@ import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
 import at.itp_uno_wifi_provider.R;
 
 public class Activity_ServerGame extends Activity implements View.OnClickListener, ClientGameUI {
+	
+	private static final boolean CW = Boolean.TRUE;
+	private static final boolean CCW = Boolean.FALSE;
+	
 
 	private Button b_sendBroadcast;
 	private Binder_Service_WifiAdmin _service = null;
@@ -45,11 +50,12 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private ImageView stapel_hin;
 	private ImageView mischen; 
 	private ImageView uno; 
+	private ImageView turndir; 
 	private ImageView[] playerTurns;
 	private TextView[] playerNames;
 
 	private ClientLogic clientLogic;
-	private boolean myTurn;
+	private boolean myTurn, turndirval;
 
 	/** Handles UI updates
 	 *  Receives messages from the logic thread
@@ -68,6 +74,10 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 			case ProtocolMessages.GTM_STARTTURN:
 				handleStartTurn(msg.getData().getBoolean("myturn"), msg.getData().getInt("pid"));
+				break;
+				
+			case ProtocolMessages.GTM_PLAYCARD:
+				handlePlayCard((Card)msg.getData().getSerializable("card"));
 				break;
 
 			default:
@@ -121,11 +131,14 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		stapel_hin = (ImageView) findViewById(R.id.imageView_stapel_hin);
 		mischen = (ImageView) findViewById(R.id.imageView_mischen);
 		uno = (ImageView) findViewById(R.id.imageView_uno);
+		turndir = (ImageView) findViewById(R.id.iv_turn_direction);
+		turndirval = CW;
 
 		stapel_ab.setOnClickListener(this);
 		stapel_hin.setOnClickListener(this);
 		mischen.setOnClickListener(this);
 		uno.setOnClickListener(this);
+		turndir.setOnClickListener(this);
 
 		horizontalLayout = (LinearLayout) findViewById(R.id.scrollViewLinearLayout);
 		stapelLayout = (LinearLayout) findViewById(R.id.linearLayout_stapel);
@@ -162,7 +175,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 					}
 					else{
 						//TODO fancy invalid play notification
-						Log.d("UNO Game", "invalid card");
+						Log.d("UNO Game"+clientLogic.getSelf().getName(), "invalid card");
 					}
 				}
 			} catch (IOException e) {
@@ -216,14 +229,15 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private void addCardToHand(Card card) {
 		//		Card localCard = randomCard();
 		cardsList.add(card);
+//		drawCardsOnScrollView(card);
 		sortCards(cardsList);
-		drawCardsOnScrollView(card);
 	}
 
 	private void removeCardFromHand(int cardId) {
-		horizontalLayout.removeViewAt(cardId);
+//		horizontalLayout.removeViewAt(cardId);
 		//stapel_hin.setImageResource(cdti.getResourceId(cardsList.get(cardId)));
 		cardsList.remove(cardId);
+		redrawCardsOnScrollView(cardsList);
 	}
 
 	private void sortCards(List<Card> paramList) {
@@ -251,17 +265,17 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	@Override
 	public void showMessage(String message) {
-		Log.d("UNO Game", message);
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), message);
 	}
 
 	@Override
 	public void showDebug(String message) {
-		Log.d("UNO Game", message);
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), message);
 	}
 
 	@Override
 	public void showError(String error) {
-		Log.e("UNO Game", error);
+		Log.e("UNO Game"+clientLogic.getSelf().getName(), error);
 	}
 
 	@Override
@@ -292,25 +306,29 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	@Override
 	public void doAction() {
 		//TODO fancy "your turn" animation
-		Log.d("UNO Game", "doaction");
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "doaction");
 	}
 
 	@Override
 	public void playCard(Card card) {
 		//TODO fancy "card played" animation"
-		Log.d("UNO Game", "playcard");
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "playcard");
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.GTM_PLAYCARD;
+		msg.getData().putSerializable("card", card);
+		handler.sendMessage(msg);
 	}
 
 	@Override
 	public void drawCard() {
 		//TODO fancy "draw card" animation
-		Log.d("UNO Game", "drawcard");
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "drawcard");
 	}
 
 	@Override
 	public void callUno() {
 		//TODO fancy "uno called" animation
-		Log.d("UNO Game", "calluno");
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "calluno");
 	}
 
 	/////
@@ -353,21 +371,31 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	public void handleDoAction() {
 		// TODO Auto-generated method stub
-		Log.d("UNO Game", "doaction");
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handledoaction");
 	}
 
 	public void handlePlayCard(Card card) {
 		// TODO Auto-generated method stub
-		Log.d("UNO Game", "playcard");
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleplaycard");
+//		if(card.getValue() == CardFaces.REVERSE){
+//			if(turndirval){
+//				turndirval = CCW;
+//				turndir.setImageResource(R.drawable.turn_gegenuhrzeigersinn);
+//			}
+//			else{
+//				turndirval = CW;
+//				turndir.setImageResource(R.drawable.turn_uhrzeigersinn);
+//			}
+//		}
 	}
 
 	public void handleDrawCard() {
 		// TODO Auto-generated method stub
-		Log.d("UNO Game", "drawcard");
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handledrawcard");
 	}
 
 	public void handleCallUno() {
 		// TODO Auto-generated method stub
-		Log.d("UNO Game", "calluno");
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handlecalluno");
 	}
 }

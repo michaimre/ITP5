@@ -2,12 +2,10 @@ package at.itp.uno.activity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -17,15 +15,21 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
+import at.itp.uno.client.core.ClientLogic;
+import at.itp.uno.server.core.ServerLogic;
+import at.itp.uno.wifi.ServiceConnection_Service_WifiAdmin;
 import at.itp.uno.wifi.Service_WifiAdmin;
+import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
 import at.itp_uno_wifi_provider.R;
 
-public class MainActivity extends Activity implements Button.OnClickListener {
+public class MainActivity extends Activity implements Button.OnClickListener, ServiceBindable {
 
 	private Button b_startGame;
 	private Button b_joinGame;
 	private Boolean tetherEnabled;
-	
+	private Binder_Service_WifiAdmin _service = null;
+	private ServiceConnection_Service_WifiAdmin connection = null;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,6 +45,30 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.d("UNO Main", "onresume");
+		ClientLogic.resetLogic();
+		if(ServerLogic.RUNNING){
+			if(bindService(new Intent(this, Service_WifiAdmin.class), connection = new ServiceConnection_Service_WifiAdmin(this),BIND_AUTO_CREATE)){
+				if(_service != null) _service.stopLogic();
+				if(connection != null){
+					unbindService(connection);
+					connection = null;
+				}
+				Intent i = new Intent(this, Service_WifiAdmin.class);
+				stopService(i);
+			}
+		}
+	}
+
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		Log.d("UNO Main", "onrestart");
 	}
 
 	@Override
@@ -68,7 +96,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 	    	}
 	    	if(tetherEnabled){
 	    		
-	    		Intent i = new Intent(this, Service_WifiAdmin.class);
+				Intent i = new Intent(this, Service_WifiAdmin.class);
 				//stopService(i);
 				startService(i);
 
@@ -94,27 +122,17 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 		else{
 			Log.v("MainActivity","JoinGame");
 
+
 			Intent intent = new Intent(this, Activity_WifiClient.class);
-//			intent.putExtra("textViewResourceId", android.R.layout.simple_list_item_1);
 			startActivity(intent);
 		}
-//		startActivityForResult(intent, 0);
-		
-		
-		
-		/*
-		if(v.equals(b_startGame)){
-			Intent i = new Intent(this, Service_WifiAdmin.class);
-			startService(i);
-			i = new Intent(this, Activity_Lobby.class);
-			startActivity(i);
-		}
-		else{
-			Log.v("There","There");
-			Intent i = new Intent(this, Activity_WifiClient.class);
-			startActivity(i); 
 
-		}*/
+	}
+
+	@Override
+	public void setIBinder(Binder_Service_WifiAdmin binder){
+		Log.d("UNO main", "setIBinder");
+		_service = binder;
 
 	}
 }

@@ -9,10 +9,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 import at.itp.uno.client.ClientGameUI;
 import at.itp.uno.client.ClientLobbyUI;
 import at.itp.uno.client.ClientUI;
 import at.itp.uno.data.Card;
+import at.itp.uno.data.CardFaces;
 import at.itp.uno.data.ClientPlayer;
 import at.itp.uno.data.HandCards;
 import at.itp.uno.data.Player;
@@ -54,6 +56,18 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 
 	public static ClientLogic getDummyLogic(){
 		return new ClientLogic();
+	}
+	
+	public static void resetLogic(){
+		if(INSTANCE!=null){
+			try {
+				INSTANCE.self.getSocket().close();
+				INSTANCE = null;
+			} catch (IOException e) {
+				Log.d("UNO client"+INSTANCE.self.getName(), "Resetting client logic");
+				Log.e("UNO client"+INSTANCE.self.getName(), e.getMessage());
+			}
+		}
 	}
 
 	protected ClientLogic(){
@@ -241,6 +255,10 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 				case ProtocolMessages.GTM_STARTTURN:
 					startTurn();
 					break;
+					
+				case ProtocolMessages.GTM_ENDOFTURN:
+					endOfTurn();
+					break;
 
 				default:
 					clientUI.showDebug("default: "+ProtocolMessages.getMessageString(action));
@@ -299,6 +317,10 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 			clientUI.showDebug("Not my turn");
 			clientGameUI.startTurn(Boolean.FALSE, nextPlayerID);
 		}
+	}
+
+	private void endOfTurn() {
+		Log.d("UNO Logic"+self.getName(), "eot");
 	}
 
 	private void doAction() throws IOException{
@@ -371,7 +393,12 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		clientGameUI.playCard(card);
 		self.getSocket().write(ProtocolMessages.GTM_PLAYCARD);
 		self.getSocket().write(card.getFace());
-		validPlay = (self.getSocket().read() == ProtocolMessages.GTM_VALIDPLAY);
+		if(card.getValue() == CardFaces.WILD || card.getValue() == CardFaces.WILDFOUR){
+			self.getSocket().write(CardFaces.RED);
+		}
+		int i = self.getSocket().read();
+		Log.d("UNO Logic"+self.getName(), "validplay is: "+ProtocolMessages.getMessageString(i));
+		validPlay = (i == ProtocolMessages.GTM_VALIDPLAY);
 		logicThread.interrupt();
 		return validPlay;
 	}

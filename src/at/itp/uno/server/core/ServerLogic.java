@@ -6,6 +6,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
+import android.util.Log;
 import at.itp.uno.data.ServerPlayer;
 import at.itp.uno.gamelogic.DummyPlayer;
 import at.itp.uno.gamelogic.GameTable;
@@ -14,14 +15,17 @@ import at.itp.uno.network.UnexpectedPlayerResponseEception;
 import at.itp.uno.network.UnoSocketWrapper;
 import at.itp.uno.network.protocol.ProtocolMessages;
 import at.itp.uno.server.ServerUI;
+import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
 
 public class ServerLogic implements Runnable{
 
+	public static boolean RUNNING = false;
+	
 	private ServerUI serverUI;
 	private ServerSocket serverSocket;
 	private LobbyAdminListener lobbyAdminListener;
 	private int port;
-	private boolean lobbyOpen;
+	private boolean lobbyOpen, forcestop;
 
 	private boolean gameStarted;
 
@@ -32,12 +36,14 @@ public class ServerLogic implements Runnable{
 	}
 
 	public ServerLogic(ServerSocket serverSocket, int port, ServerUI serverUI){
+		RUNNING = true;
 		this.serverUI=serverUI;
 		this.port=port;
 		this.serverSocket = serverSocket;
 
 		gameStarted = false;
 		lobbyOpen = false;
+		forcestop = false;
 
 		gameTable = new GameTable(serverUI);
 	}
@@ -90,7 +96,7 @@ public class ServerLogic implements Runnable{
 			//			new Thread(lobbyAdminListener).start();
 			//			serverUI.showMessage("Admin connected");
 			int cid = 1;
-			while(!serverSocket.isClosed()){
+			while(!serverSocket.isClosed() && !forcestop){
 				try{
 					//TODO timeout set to 0 while in lobby
 					serverUI.showMessage("Waiting for player to join");
@@ -145,10 +151,10 @@ public class ServerLogic implements Runnable{
 	/////////////
 
 	public void gameLoop(){
-		boolean endofturn = Boolean.FALSE;
 		serverUI.showMessage("Starting game loop");
 		ServerPlayer currentPlayer = null;
-		while((currentPlayer = gameTable.nextTurn())!=null){
+		while(!forcestop && (currentPlayer = gameTable.nextTurn())!=null){
+			boolean endofturn = Boolean.FALSE;
 			serverUI.showMessage("Next player: "+currentPlayer.toString());
 			try {
 				if(gameTable.getCardsToDraw()>0){
@@ -158,7 +164,7 @@ public class ServerLogic implements Runnable{
 						gameTable.forceDraw(currentPlayer);
 					}
 					else{
-						while(!endofturn){
+						while(!forcestop && !endofturn){
 							serverUI.showMessage("Waiting for player decision");
 							int action = currentPlayer.getAction();
 							switch(action){
@@ -185,7 +191,7 @@ public class ServerLogic implements Runnable{
 					}
 				}
 				else{
-					while(!endofturn){
+					while(!forcestop && !endofturn){
 						serverUI.showMessage("Waiting for player action");
 						int action = currentPlayer.getAction();
 						switch(action){
@@ -251,6 +257,18 @@ public class ServerLogic implements Runnable{
 
 	public boolean isLobbyOpen() {
 		return lobbyOpen;
+	}
+
+	public void stopLogic(){
+		try {
+			forcestop = true;
+			if(serverSocket != null && !serverSocket.isClosed()) serverSocket.close();
+			gameTable.purge();
+			RUNNING = false;
+		} catch (IOException e) {
+			Log.d("UNO server", "force stopping, don't mind me");
+			Log.e("UNO server", e.getMessage());
+		}
 	}
 }
 
