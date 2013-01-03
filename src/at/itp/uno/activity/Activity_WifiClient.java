@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 import at.itp.uno.wifi.WifiAdapter;
 import at.itp_uno_wifi_provider.R;
 
@@ -34,10 +35,10 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
         wifi_m = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         if(wifi_m.isWifiEnabled()){
           wifi_m.setWifiEnabled(false);
-        }else{
+        }
+        else{
           wifi_m.setWifiEnabled(true);
         }
-        
         wifi_m.createWifiLock(1, "WifiLock");
     }
 
@@ -45,7 +46,15 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
 		ScanResult hotSpot = (ScanResult) lv_hotSpots.getAdapter().getItem(position);
-		WifiConfiguration config = new WifiConfiguration();
+		
+		Log.d("WifiPreference", "capabs " + hotSpot.capabilities );
+		if(!hotSpot.capabilities.startsWith("[WPA-")){
+			Toast toast = Toast.makeText(this, "Not a valid Uno HotSpot, WPA Security required", Toast.LENGTH_LONG);
+			toast.show();
+		}
+		else{
+			WifiConfiguration config = new WifiConfiguration();
+
 		
 		/*List<WifiConfiguration> configList = wifi_m.getConfiguredNetworks();
 		for(WifiConfiguration wifi : configList){
@@ -53,35 +62,38 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 			
 		}*/
 	
-		config.SSID = "\"" + hotSpot.SSID + "\""; //"\"SSIDName\"";
-		//config.preSharedKey  ="\"samsamsam\"";
-		config.hiddenSSID = false;
-		config.status = WifiConfiguration.Status.ENABLED;        
-		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-		config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-		config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-		config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-		config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-		//wifi_m.removeNetwork(0);
-		//wifi_m.disconnect();
-		
-		int res = wifi_m.addNetwork(config);
-		boolean networkEnabled = wifi_m.enableNetwork(res, true); 
-		
-		//for(int x=0; x <900;x++){ Log.v("s","sd"+x);}
-		Log.d("WifiPreference", "add Network returned " + res );
-		Log.d("WifiPreference", "enableNetwork returned " + networkEnabled );
-		Log.d("WifiPreference", "enableNetwork returned " + wifi_m.getConnectionInfo().toString());
-		Log.d("WifiPreference", "enableNetwork returned " + this.intToIp(wifi_m.getDhcpInfo().gateway));
-		Log.d("WifiPreference", "enableNetwork returned " + wifi_m.pingSupplicant());
-
-		//TODO IP HERE
-		if(networkEnabled){
-			Intent i = new Intent(this, Activity_Lobby.class);
-			i.putExtra("AccessPointIP", this.intToIp(wifi_m.getDhcpInfo().gateway));
-			i.putExtra("textViewResourceId", android.R.layout.simple_list_item_1);
-			startActivity(i);
+			config.SSID = "\"" + hotSpot.SSID + "\""; //"\"SSIDName\"";
+			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+			config.preSharedKey  ="\"samsamsam\"";
+			config.hiddenSSID = false;
+			config.status = WifiConfiguration.Status.ENABLED;        
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+	
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+	
+			//wifi_m.removeNetwork(0);
+			//wifi_m.disconnect();
+			
+			int res = wifi_m.addNetwork(config);
+			boolean networkEnabled = wifi_m.enableNetwork(res, true); 
+			
+			//for(int x=0; x <900;x++){ Log.v("s","sd"+x);}
+			Log.d("WifiPreference", "add Network returned " + res );
+			Log.d("WifiPreference", "enableNetwork returned " + networkEnabled );
+			Log.d("WifiPreference", "enableNetwork returned " + wifi_m.getConnectionInfo().toString());
+			Log.d("WifiPreference", "enableNetwork returned " + this.intToIp(wifi_m.getDhcpInfo().gateway));
+			Log.d("WifiPreference", "enableNetwork returned " + wifi_m.pingSupplicant());
+	
+			//TODO IP HERE
+			if(networkEnabled){
+				Intent i = new Intent(this, Activity_Lobby.class);
+				i.putExtra("AccessPointIP", this.intToIp(wifi_m.getDhcpInfo().gateway));
+				i.putExtra("textViewResourceId", android.R.layout.simple_list_item_1);
+				startActivity(i);
+			}
 		}
 	}
 
