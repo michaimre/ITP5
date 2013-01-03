@@ -91,6 +91,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 		clientLogic = ClientLogic.getInstance();
 		clientLogic.setClientGameUI(this);
+		clientLogic.setActivity(this);
 
 		cdti = new CardToResourceId();
 

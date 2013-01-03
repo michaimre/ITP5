@@ -35,6 +35,7 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 	private ClientLogic clientLogic;
 	private int _listItemStyle;
 	private ListViewAdapterPlayers adapterPlayers;
+	private boolean isHost;
 	
 	/** Handles UI updates
 	 *  Receives messages from the logic thread
@@ -81,14 +82,17 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 		
 		clientLogic = ClientLogic.getInstance();
 		clientLogic.setClientLobbyUI(this);
+		clientLogic.setActivity(this);
 		
 //		clientLogic.getSelf().setName("Hugo");
 		
 		if(_listItemStyle == android.R.layout.simple_list_item_multiple_choice){
 			lv_players.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 			clientLogic.joinGame("localhost", 30600);
+			isHost = Boolean.TRUE;
 		}
 		else{
+			isHost = Boolean.FALSE;
 			b_startGame.setVisibility(Button.INVISIBLE);
 			b_main.setVisibility(Button.INVISIBLE);
 			//b_debug.setVisibility(Button.INVISIBLE);
@@ -129,7 +133,8 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		bindService(new Intent(this, Service_WifiAdmin.class), connection = new ServiceConnection_Service_WifiAdmin(this),BIND_AUTO_CREATE);
+		if(isHost)
+			bindService(new Intent(this, Service_WifiAdmin.class), connection = new ServiceConnection_Service_WifiAdmin(this),BIND_AUTO_CREATE);
 	}
 
 	@Override

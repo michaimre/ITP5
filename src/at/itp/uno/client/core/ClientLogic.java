@@ -5,6 +5,10 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.util.LinkedList;
 
+import android.app.Activity;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import at.itp.uno.client.ClientGameUI;
 import at.itp.uno.client.ClientLobbyUI;
 import at.itp.uno.client.ClientUI;
@@ -21,7 +25,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 	private static final long serialVersionUID = 7853653519504543217L;
 
 	private static final long ACTIONSLEEPTIME = 60*1000;
-	
+
 	private static ClientLogic INSTANCE;
 
 	private String host;
@@ -30,6 +34,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 	private Thread logicThread;
 	private UnoServer unoServer; 
 	private ClientLobbyAdmin clientLobbyAdmin;
+	private Activity activity;
 
 	private ClientPlayer self;
 	private HandCards hand;
@@ -39,14 +44,14 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 	private ClientLobbyUI clientLobbyUI;
 	private ClientGameUI clientGameUI;
 	private ClientUI clientUI;
-	
+
 	public static ClientLogic getInstance(){
 		if(INSTANCE == null){
 			INSTANCE = new ClientLogic();
 		}
 		return INSTANCE;
 	}
-	
+
 	public static ClientLogic getDummyLogic(){
 		return new ClientLogic();
 	}
@@ -62,6 +67,14 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		validPlay = Boolean.FALSE;
 		topCard = new Card((short)0);
 		logicThread = new Thread(this);
+	}
+
+	public Activity getActivity() {
+		return activity;
+	}
+
+	public void setActivity(Activity activity) {
+		this.activity = activity;
 	}
 
 	public ClientGameUI getClientGameUI() {
@@ -145,6 +158,14 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		listening = Boolean.TRUE;
 		try {
 			//TODO timeout set to 0 while in lobby
+			if(activity!=null){
+				ConnectivityManager cm =(ConnectivityManager)activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+				NetworkInfo netInfo = null;
+				do{
+					netInfo = cm.getActiveNetworkInfo();
+				}
+				while (netInfo == null || !netInfo.isConnected());
+			}
 			self = new ClientPlayer(new UnoSocketWrapper(new Socket(host, port), 0), playername);
 			clientLobbyUI.playerJoined(self);
 			clientUI.showDebug("Self is: "+self.getId()+" ,"+self.getName());
@@ -164,7 +185,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 				case ProtocolMessages.LM_PLAYERJOINED:
 					playerJoined(self.getSocket().read());
 					break;
-					
+
 				case ProtocolMessages.GM_PLAYERDROPPED:
 					playerDropped(self.getSocket().read());
 					break;
@@ -175,7 +196,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 					listening = Boolean.FALSE;
 					clientLobbyUI.gameStarting();
 					break;
-					
+
 				case ProtocolMessages.GM_GAMECLOSING:
 					clientLobbyUI.gameClosing();
 					self.getSocket().close();
