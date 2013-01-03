@@ -26,7 +26,7 @@ import at.itp.uno.wifi.Service_WifiAdmin;
 import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
 import at.itp_uno_wifi_provider.R;
 
-public class Activity_Lobby extends Activity implements Button.OnClickListener, ClientLobbyUI{
+public class Activity_Lobby extends Activity implements Button.OnClickListener, ClientLobbyUI, ServiceBindable{
 
 	private ListView lv_players;
 	private Button b_startGame, b_main, b_debug;

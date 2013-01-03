@@ -25,6 +25,7 @@ public class Service_WifiAdmin extends Service {
 	ArrayList<Socket> clientSockets = null; //Die Client Sockets Liste muss m�glicherweise gelockt werden (m�glicher Datenzugriffkonflikt?)
 	private Thread_WaitingForClientConnections thread_WaitingForClients = null;
 	private ServerLogic serverLogic;
+	private Thread logicthread;
 	
 	@Override
 	public void onCreate() {
@@ -39,7 +40,8 @@ public class Service_WifiAdmin extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		try {
 			serverLogic = new ServerLogic(new ServerSocket(30600), 30600, new AndroidLogUI());
-			new Thread(serverLogic).start();
+			logicthread = new Thread(serverLogic);
+			logicthread.start();
 		} catch (IOException e) {
 			Log.e("UNO service", e.getMessage());
 		}
@@ -128,6 +130,11 @@ public class Service_WifiAdmin extends Service {
 			serverLogic.startGame();
 		}
 				
+		public void stopLogic(){
+			serverLogic.stopLogic();
+			logicthread.stop();
+			serverLogic = null;
+		}
 	}
 	
 	//Thread der die Socketverbindungen zu den Clients aufbaut

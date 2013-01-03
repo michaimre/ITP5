@@ -108,7 +108,8 @@ public class ServerPlayer extends Player{
 	}
 
 	public void endTurn() throws IOException {
-		socket.write(ProtocolMessages.GTM_ENDOFTURN);
+		//socket.write(ProtocolMessages.GTM_ENDOFTURN);
+		socket.setTimeout(UnoSocketWrapper.TIMEOUT);
 	}
 
 	public int getAccusedPlayer() throws IOException {
