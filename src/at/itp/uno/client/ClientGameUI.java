@@ -12,5 +12,7 @@ public interface ClientGameUI extends ClientUI{
 	public void playCard(Card card);
 	public void drawCard();
 	public void callUno();
+	public void gameWon();
+	public void playerAccused();
 	
 }

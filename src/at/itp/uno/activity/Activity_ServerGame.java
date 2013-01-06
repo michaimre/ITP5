@@ -79,7 +79,15 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 			case ProtocolMessages.GTM_PLAYCARD:
 				handlePlayCard((Card)msg.getData().getSerializable("card"));
 				break;
+			
+			case ProtocolMessages.GTM_GAMEWON:
+				handleGameWon();
+				break;
 
+			case ProtocolMessages.GTM_ACCUSE:
+				handlePlayerAccused();
+				break;
+				
 			default:
 				break;
 			}
@@ -331,6 +339,22 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "calluno");
 	}
 
+	@Override
+	public void gameWon() {
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "gamewon");
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.GTM_GAMEWON;
+		handler.sendMessage(msg);
+	}
+
+	@Override
+	public void playerAccused() {
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "playeraccused");
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.GTM_ACCUSE;
+		handler.sendMessage(msg);
+	}
+
 	/////
 	//Handler methods
 	/////
@@ -397,5 +421,15 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	public void handleCallUno() {
 		// TODO Auto-generated method stub
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handlecalluno");
+	}
+
+	public void handleGameWon() {
+		// TODO Auto-generated method stub
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleGameWon");
+	}
+
+	public void handlePlayerAccused() {
+		// TODO Auto-generated method stub
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handlePlayerAccused");
 	}
 }

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.util.LinkedList;
 
+import android.R.bool;
 import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -32,7 +33,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 
 	private String host;
 	private int port;
-	private boolean gameStarted, myTurn, validPlay, listening;
+	private boolean gameStarted, myTurn, validPlay, listening, gamewon;
 	private Thread logicThread;
 	private UnoServer unoServer; 
 	private ClientLobbyAdmin clientLobbyAdmin;
@@ -79,6 +80,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		myTurn = Boolean.FALSE;
 		gameStarted = Boolean.FALSE;
 		validPlay = Boolean.FALSE;
+		gamewon = Boolean.FALSE;
 		topCard = new Card((short)0);
 		logicThread = new Thread(this);
 	}
@@ -240,7 +242,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 			}
 		}
 		try {
-			while(true){
+			while(!gamewon){
 				clientUI.showDebug("Listening...");
 				int action = self.getSocket().read();
 				switch(action){
@@ -259,6 +261,11 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 				case ProtocolMessages.GTM_ENDOFTURN:
 					endOfTurn();
 					break;
+					
+				case ProtocolMessages.GTM_GAMEWON:
+					gamewon = Boolean.TRUE;
+					gameWon();
+					break;
 
 				default:
 					clientUI.showDebug("default: "+ProtocolMessages.getMessageString(action));
@@ -270,6 +277,10 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 			e.printStackTrace();
 			clientUI.showError(e.getMessage());
 		}
+	}
+
+	private void gameWon() {
+		clientGameUI.gameWon();
 	}
 
 	private void playerJoined(int playerid) throws IOException{

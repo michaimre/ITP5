@@ -222,6 +222,7 @@ public class GameTable {
 			card = deck.drawCard();
 		}
 		serverUI.showMessage("Deal card: "+card.toString()+" to player: "+player.toString());
+		player.addCard();
 		player.dealCard(card);
 	}
 
@@ -322,6 +323,7 @@ public class GameTable {
 		Log.d("UNO Server", "valid play: "+validPlay);
 		currentPlayer.sendPlayedCardResult(validPlay);
 		if(validPlay){
+			currentPlayer.removeCard();
 			broadcastMessage(ProtocolMessages.GTM_PLAYCARD, currentPlayer);
 			changeTopCard(playedCard);
 		}
@@ -346,7 +348,12 @@ public class GameTable {
 	public void endTurn(){
 		for(ServerPlayer p:playerqueue){
 			try{
-				p.endTurn();
+				if(p.getCards()<=0){
+					p.gameWon();
+				}
+				else{
+					p.endTurn();
+				}
 			}
 			catch(IOException ioe){
 				playerDisconnected(p);

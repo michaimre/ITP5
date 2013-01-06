@@ -133,5 +133,15 @@ public class DummyPlayer extends Thread implements ClientLobbyUI, ClientGameUI{
 	public void gameClosing() {
 		Log.d("UNO Dummy"+myid, "gameclosing");
 	}
+
+	@Override
+	public void gameWon() {
+		Log.d("UNO Dummy"+myid, "gamewon");
+	}
+
+	@Override
+	public void playerAccused() {
+		Log.d("UNO Dummy"+myid, "playeraccused");
+	}
 	
 }
