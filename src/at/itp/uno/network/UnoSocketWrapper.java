@@ -13,7 +13,7 @@ public class UnoSocketWrapper{
 	private static final char BS = (char)8;
 	private static final char ESC = (char)27;
 	public static final int TIMEOUT = 0; //15*1000; TODO change this before releasing ffs
-	public static final int EOTTIMEOUT = 2*1000;
+	public static final int EOTTIMEOUT = 3*1000;
 	
 	private short state;
 	private Socket socket;

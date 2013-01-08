@@ -64,7 +64,6 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private Random randomGenerator = new Random();
 	private ImageView stapel_ab;
 	private ImageView stapel_hin;
-	private ImageView mischen; 
 	private ImageView uno; 
 	private ImageView turndir; 
 	private ImageView gameDialog; 
@@ -74,7 +73,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private ClientLogic clientLogic;
 	private boolean myTurn, setup;
 	private int turndirval;
-	private int color, cardindex;
+	private int color, cardindex, cardsreceived;
 
 	/** Handles UI updates
 	 *  Receives messages from the logic thread
@@ -136,6 +135,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 		cdti = new CardToResourceId();
 
+		cardsreceived = 0;
+
 		playerTurns = new ImageView[4];
 		playerNames = new TextView[4];
 
@@ -167,7 +168,6 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 		stapel_ab.setOnClickListener(this);
 		stapel_hin.setOnClickListener(this);
-		mischen.setOnClickListener(this);
 		uno.setOnClickListener(this);
 		gameDialog.setOnClickListener(this);
 		
@@ -185,8 +185,6 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		stapel_ab.setLayoutParams(layoutParams);
 		stapel_hin.setLayoutParams(layoutParams);
 		drawCardsOnScrollView(cardsList);
-		
-		setup = true;
 	}
 
 	@Override
@@ -201,6 +199,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 					clientLogic.drawCard();
 				} else if(v.equals(uno)) {
 					clientLogic.callUno();
+				} else if(v.equals(gameDialog)) {
+					showDialog(DIALOG_HOME);
 				} else {
 					cardindex = horizontalLayout.indexOfChild(v);
 					color = -1;
@@ -282,7 +282,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private final class DialogItemListener_color implements DialogInterface.OnClickListener{
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
-			int color = 0;
+			int color = -1;
 			if (which == 0) {
 				color = CardFaces.RED;
 			} else if (which == 1) {
@@ -292,7 +292,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 			} else if (which == 4) {
 				color = CardFaces.YELLOW;
 			}
-			playCard(cardsList.get(cardindex), color);
+			if(color>0)
+				playCard(cardsList.get(cardindex), color);
 		}
 	}
 	
@@ -345,7 +346,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		
 		Toast toast = new Toast(getApplicationContext());
 		toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-		toast.setDuration(Toast.LENGTH_LONG);
+		toast.setDuration(Toast.LENGTH_SHORT);
 		toast.setView(layout);
 		toast.show();
 	}
@@ -541,9 +542,12 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		//		sortCards(cardsList);
 		//		redrawCardsOnScrollView(cardsList);
 		addCardToHand(card);
-		if(setup){
+		if(cardsreceived>6){
 			showToast(DRAWCARDS);
 //			Toast.makeText(this, "Got a card: "+card.toString(), Toast.LENGTH_SHORT).show();
+		}
+		else{
+			cardsreceived++;
 		}
 	}
 

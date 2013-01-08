@@ -27,7 +27,7 @@ import at.itp_uno_wifi_provider.R;
 public class Activity_Lobby extends Activity implements Button.OnClickListener, ClientLobbyUI, ServiceBindable{
 
 	private ListView lv_players;
-	private Button b_startGame, b_main, b_debug;
+	private Button b_startGame;
 	private ArrayList<String> _spieler;
 	private Binder_Service_WifiAdmin _service = null;
 	private ServiceConnection_Service_WifiAdmin connection = null;
@@ -74,9 +74,6 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 		lv_players.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		b_startGame = (Button)findViewById(R.id.b_startGame);
 		b_startGame.setOnClickListener(this);
-		b_main.setOnClickListener(this);
-		b_debug.setOnClickListener(this);
-		b_debug.setVisibility(ImageView.INVISIBLE);
 		_spieler = new ArrayList<String>();
 		Bundle extras = getIntent().getExtras();
 		_listItemStyle = extras.getInt("textViewResourceId");
@@ -96,7 +93,6 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 		else{
 			isHost = Boolean.FALSE;
 			b_startGame.setVisibility(Button.INVISIBLE);
-			b_main.setVisibility(Button.INVISIBLE);
 			//b_debug.setVisibility(Button.INVISIBLE);
 			lv_players.setChoiceMode(ListView.CHOICE_MODE_NONE);
 			clientLogic.joinGame(getIntent().getExtras().getString("AccessPointIP"), 30600);
@@ -129,12 +125,6 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 			else{
 				Toast.makeText(this, "Need at least two players", Toast.LENGTH_LONG).show();
 			}
-		}
-		else if(v.equals(b_main)){
-
-		}
-		else if(v.equals(b_debug)){
-			_service.addDebugPlayers();
 		}
 	}
 
