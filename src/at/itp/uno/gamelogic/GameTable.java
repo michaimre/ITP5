@@ -398,6 +398,7 @@ public class GameTable {
 				}
 				e.printStackTrace();
 			}
+			playerqueue.removeFirst();
 		}
 		for(ServerPlayer p:players){
 			try {
