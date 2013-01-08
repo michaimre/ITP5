@@ -162,9 +162,11 @@ public class ServerLogic implements Runnable{
 					serverUI.showMessage("Player needs to draw cards");
 					if(gameTable.getWildColor()>=0){
 						serverUI.showMessage("Wild four detected, force draw");
+						currentPlayer.drawFourOnTop();
 						gameTable.forceDraw(currentPlayer);
 					}
 					else{
+						currentPlayer.drawTwoOnTop();
 						while(!forcestop && !endofturn){
 							serverUI.showMessage("Waiting for player decision");
 							int action = currentPlayer.getAction();

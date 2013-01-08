@@ -177,6 +177,7 @@ public class GameTable {
 	 */
 	public ServerPlayer nextTurn(){
 		ServerPlayer nextplayer = null;
+		// TODO size()>1
 		if(playerqueue.size()>1){
 			nextplayer = playerqueue.getFirst();
 			for(int i=0;i<playerqueue.size();i++){

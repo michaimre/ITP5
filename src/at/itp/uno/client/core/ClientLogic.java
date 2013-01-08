@@ -238,7 +238,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		}
 		try {
 			//get player queue
-			if(self.getSocket().read()!=ProtocolMessages.LM_STARTOFPLAYERLIST){
+			if(false && self.getSocket().read()!=ProtocolMessages.LM_STARTOFPLAYERLIST){
 				otherPlayers.clear();
 				int m;
 				while((m=self.getSocket().read())!=ProtocolMessages.LM_ENDOFPLAYERLIST){
@@ -271,6 +271,14 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 					accusePlayer();
 					break;
 					
+				case ProtocolMessages.GTM_FORCEDRAW:
+					forceDraw();
+					break;
+					
+				case ProtocolMessages.GTM_DRAWTWO:
+					drawTwo();
+					break;
+					
 				case ProtocolMessages.GTM_GAMEWON:
 					gamewon = Boolean.TRUE;
 					gameWon();
@@ -286,6 +294,14 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 			e.printStackTrace();
 			clientUI.showError(e.getMessage());
 		}
+	}
+
+	private void drawTwo() {
+		clientGameUI.drawTwo();
+	}
+
+	private void forceDraw() {
+		clientGameUI.forceDraw();
 	}
 
 	private void gameWon() {
@@ -409,12 +425,17 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 
 	@Override
 	public boolean playCard(Card card) throws IOException {
+		return playCard(card, 0);
+	}
+
+	@Override
+	public boolean playCard(Card card, int color) throws IOException {
 		clientUI.showDebug("Playing card: "+card.toString());
 		clientGameUI.playCard(card);
 		self.getSocket().write(ProtocolMessages.GTM_PLAYCARD);
 		self.getSocket().write(card.getFace());
 		if(card.getValue() == CardFaces.WILD || card.getValue() == CardFaces.WILDFOUR){
-			self.getSocket().write(CardFaces.RED);
+			self.getSocket().write(color);
 		}
 		int i = self.getSocket().read();
 		Log.d("UNO Logic"+self.getName(), "validplay is: "+ProtocolMessages.getMessageString(i));

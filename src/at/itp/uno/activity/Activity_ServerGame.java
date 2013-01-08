@@ -6,12 +6,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import android.R.string;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,6 +29,7 @@ import android.widget.Toast;
 import at.itp.uno.client.ClientGameUI;
 import at.itp.uno.client.core.ClientLogic;
 import at.itp.uno.data.Card;
+import at.itp.uno.data.CardFaces;
 import at.itp.uno.data.CardToResourceId;
 import at.itp.uno.data.ClientPlayer;
 import at.itp.uno.network.protocol.ProtocolMessages;
@@ -70,6 +71,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	private ClientLogic clientLogic;
 	private boolean myTurn, turndirval, setup;
+	private int color;
 
 	/** Handles UI updates
 	 *  Receives messages from the logic thread
@@ -190,18 +192,20 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		// if (connection != null) {
 		// _service.sendTestBroadcast(et_broadcastMessage.getText().toString());
 		// }
-
+		
 		if(myTurn){
 			try {
 				if (v.equals(stapel_ab)) {
 					clientLogic.drawCard();
 				} else if(v.equals(uno)) {
 					clientLogic.callUno();
-				} else if (v.equals(gameDialog)){						
-					
 				} else {
 					int j = horizontalLayout.indexOfChild(v);
-					if(clientLogic.playCard(cardsList.get(j))){
+					color = 0;
+					if(cardsList.get(j).getColor()==0){
+						showDialog(DIALOG_CHOOSE_COLOR);
+					}
+					if(clientLogic.playCard(cardsList.get(j), color)){
 						removeCardFromHand(j);
 					}
 					else{
@@ -213,6 +217,9 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 				e.printStackTrace();
 			}
 		}
+		else if (v.equals(gameDialog)){
+			showDialog(DIALOG_HOME);
+		}
 		else {
 			showToast(NOTYOURTURN);
 		}
@@ -221,18 +228,18 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		Builder alertBuilder = new AlertDialog.Builder(this);
-		alertBuilder.setTitle("Game Menu");
 		alertBuilder.setCancelable(true);
-
+		
 		switch (id) {
 		case 1:
-			alertBuilder.setItems(R.array.game_menu_list_server, new DialogItemListener());	
+			alertBuilder.setTitle("Game Menu");
+			alertBuilder.setItems(R.array.dialogGame_list, new DialogItemListener_game());
 			break;
 		case 2: 
-			alertBuilder.setItems(R.array.game_menu_list_client, new DialogItemListener());
+			alertBuilder.setTitle("Pick a Color!");
+			alertBuilder.setItems(R.array.dialogChooseColor_list, new DialogItemListener_color());
 			break;
 		default:
-			alertBuilder.setItems(R.array.game_menu_list_server, new DialogItemListener());	
 			break;
 		}
 		
@@ -250,11 +257,26 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		return super.onCreateDialog(id);
 	}
 	
-	private final class DialogItemListener implements DialogInterface.OnClickListener{
+	private final class DialogItemListener_game implements DialogInterface.OnClickListener{
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
 			if (which == 0){
 				sortCards(cardsList);
+			}
+		}
+	}
+	
+	private final class DialogItemListener_color implements DialogInterface.OnClickListener{
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			if (which == 0) {
+				color = CardFaces.RED;
+			} else if (which == 1) {
+				color = CardFaces.GREEN;
+			} else if (which == 3) {
+				color = CardFaces.BLUE;
+			} else if (which == 4) {
+				color = CardFaces.YELLOW;
 			}
 		}
 	}
