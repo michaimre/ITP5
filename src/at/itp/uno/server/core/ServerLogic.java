@@ -151,7 +151,7 @@ public class ServerLogic implements Runnable{
 	public void gameLoop(){
 		serverUI.showMessage("Starting game loop");
 		//Boradcast player queue
-		gameTable.broadcastQueue();
+//		gameTable.broadcastQueue();
 		
 		ServerPlayer currentPlayer = null;
 		while(!forcestop && (currentPlayer = gameTable.nextTurn())!=null){

@@ -145,7 +145,7 @@ public class GameTable {
 		serverUI.showMessage("Top card is: "+topCard.toString());
 		//Shuffle players
 		playerqueue = new LinkedList<ServerPlayer>(players);
-		Collections.shuffle(playerqueue);
+//		Collections.shuffle(playerqueue);
 		serverUI.showMessage("Player queue:");
 		for(ServerPlayer p:playerqueue){
 			try {
@@ -488,6 +488,7 @@ public class GameTable {
 	}
 
 	public void broadcastQueue() {
+		Log.d("UNO table", "Broadcast list");
 		broadcastMessage(ProtocolMessages.LM_STARTOFPLAYERLIST, null);
 		for(ServerPlayer p:playerqueue){
 			broadcastMessage(p.getId(), null);
