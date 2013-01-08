@@ -8,6 +8,7 @@ import java.util.Random;
 
 import android.R.string;
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -189,7 +190,12 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 					clientLogic.callUno();
 				} else {
 					int j = horizontalLayout.indexOfChild(v);
-					if(clientLogic.playCard(cardsList.get(j))){
+					int color = 0;
+					if(cardsList.get(j).getColor()==0){
+						//TODO color chooser here
+						color = Color.RED;
+					}
+					if(clientLogic.playCard(cardsList.get(j), color)){
 						removeCardFromHand(j);
 					}
 					else{

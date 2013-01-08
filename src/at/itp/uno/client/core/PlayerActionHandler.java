@@ -13,6 +13,7 @@ public abstract class PlayerActionHandler{
 	
 	//Game actions
 	public abstract boolean playCard(Card card) throws IOException;
+	public abstract boolean playCard(Card card, int color) throws IOException;
 	public abstract void drawCard() throws IOException;
 	public abstract void callUno() throws IOException;
 	public abstract void accusePlayer() throws IOException;

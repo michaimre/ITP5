@@ -166,4 +166,12 @@ public class ServerPlayer extends Player{
 	public void gameWon() throws IOException {
 		socket.write(ProtocolMessages.GTM_GAMEWON);
 	}
+
+	public void drawFourOnTop() throws IOException {
+		socket.write(ProtocolMessages.GTM_FORCEDRAW);
+	}
+
+	public void drawTwoOnTop() throws IOException {
+		socket.write(ProtocolMessages.GTM_DRAWTWO);
+	}
 }
