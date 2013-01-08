@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import at.itp.uno.client.ClientGameUI;
 import at.itp.uno.client.core.ClientLogic;
 import at.itp.uno.data.Card;
@@ -426,6 +427,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	public void handleGameWon() {
 		// TODO Auto-generated method stub
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleGameWon");
+		Toast.makeText(this, "GZ!", Toast.LENGTH_LONG).show();
 	}
 
 	public void handlePlayerAccused() {

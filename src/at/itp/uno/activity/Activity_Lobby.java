@@ -130,6 +130,9 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 				Intent i = new Intent(this,Activity_ServerGame.class);
 				startActivity(i);	
 			}
+			else{
+				Toast.makeText(this, "Need at least two players", Toast.LENGTH_LONG).show();
+			}
 		}
 		else if(v.equals(b_main)){
 
