@@ -41,6 +41,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	
 	private static final int FALSECARD = 1;
 	private static final int NOTYOURTURN = 2;
+	private static final int GAMEWON = 3;
 
 	private Button b_sendBroadcast;
 	private Binder_Service_WifiAdmin _service = null;
@@ -207,15 +208,22 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_root));
 
 		TextView text = (TextView) layout.findViewById(R.id.toast_text);
+		ImageView image = (ImageView) layout.findViewById(R.id.toast_imageView);
 		
 		switch (param) {
 		case FALSECARD:
+			image.setImageResource(R.drawable.kick);
 			text.setText(R.string.t_cannotPlayCard);
 			break;
 
 		case NOTYOURTURN:
+			image.setImageResource(R.drawable.kick);
 			text.setText(R.string.t_cannotPlayCardOtherPlayersTurn);
 			break;
+			
+		case GAMEWON:
+			image.setImageResource(R.drawable.stern);
+			text.setText(R.string.t_gameWon);
 			
 		default:
 			break;
@@ -461,7 +469,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	public void handleGameWon() {
 		// TODO Auto-generated method stub
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleGameWon");
-		Toast.makeText(this, "GZ!", Toast.LENGTH_LONG).show();
+		showToast(GAMEWON);
 	}
 
 	public void handlePlayerAccused() {

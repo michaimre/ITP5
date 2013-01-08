@@ -11,6 +11,7 @@
     <string name="a_wifiserver_localhost">Connect to Localhost (StartGame)</string>
     <string name="t_cannotPlayCard">Cannot play this card! Check color!</string>
     <string name="t_cannotPlayCardOtherPlayersTurn">It is another players turn!</string>
+    <string name="t_gameWon">You have won the game, congrats ^(^.^)^!</string>
     <string name="game_cards">Cards: </string>
     <string name="blank"> </string>    
 </resources>
