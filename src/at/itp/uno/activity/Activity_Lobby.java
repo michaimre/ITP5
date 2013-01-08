@@ -12,6 +12,7 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 import at.itp.uno.client.ClientLobbyUI;
@@ -77,6 +78,7 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 		b_main.setOnClickListener(this);
 		b_debug = (Button)findViewById(R.id.b_ldebug);
 		b_debug.setOnClickListener(this);
+		b_debug.setVisibility(ImageView.INVISIBLE);
 		_spieler = new ArrayList<String>();
 		Bundle extras = getIntent().getExtras();
 		_listItemStyle = extras.getInt("textViewResourceId");

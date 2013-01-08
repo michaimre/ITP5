@@ -39,13 +39,15 @@ import at.itp_uno_wifi_provider.R;
 
 public class Activity_ServerGame extends Activity implements View.OnClickListener, ClientGameUI {
 	
-	private static final boolean CW = Boolean.TRUE;
-	private static final boolean CCW = Boolean.FALSE;
 	
 	private static final int FALSECARD = 1;
 	private static final int NOTYOURTURN = 2;
 	private static final int GAMEWON = 3;
-
+	private static final int YOURTURN = 4;
+	private static final int DRAWCARDS = 5;
+	private static final int OTHERPLAYER = 6;
+	private static final int NOTCALLEDUNO = 7;
+	
 	private static final int DIALOG_HOME = 1;
 	private static final int DIALOG_CHOOSE_COLOR = 2;
 	
@@ -70,7 +72,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private TextView[] playerNames;
 
 	private ClientLogic clientLogic;
-	private boolean myTurn, turndirval, setup;
+	private boolean myTurn, setup;
+	private int turndirval;
 	private int color, cardindex;
 
 	/** Handles UI updates
@@ -157,11 +160,10 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 		stapel_ab = (ImageView) findViewById(R.id.imageView_stapel_ab);
 		stapel_hin = (ImageView) findViewById(R.id.imageView_stapel_hin);
-		mischen = (ImageView) findViewById(R.id.imageView_mischen);
 		uno = (ImageView) findViewById(R.id.imageView_uno);
 		turndir = (ImageView) findViewById(R.id.iv_turn_direction);
 		gameDialog = (ImageView) findViewById(R.id.imageView_gameDialog);
-		turndirval = CW;
+		turndirval = 1;
 
 		stapel_ab.setOnClickListener(this);
 		stapel_hin.setOnClickListener(this);
@@ -183,8 +185,6 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		stapel_ab.setLayoutParams(layoutParams);
 		stapel_hin.setLayoutParams(layoutParams);
 		drawCardsOnScrollView(cardsList);
-		
-		cardsList.add(new Card(CardFaces.WILD, (short)0));
 		
 		setup = true;
 	}
@@ -317,6 +317,27 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		case GAMEWON:
 			image.setImageResource(R.drawable.stern);
 			text.setText(R.string.t_gameWon);
+			break;
+			
+		case YOURTURN:
+			image.setImageResource(R.drawable.info);
+			text.setText(R.string.t_yourTurn);
+			break;
+			
+		case DRAWCARDS:
+			image.setImageResource(R.drawable.info);
+			text.setText(R.string.t_gotCard);
+			break;
+		
+		case OTHERPLAYER:
+			image.setImageResource(R.drawable.info);
+			text.setText(R.string.t_wait);
+			break;
+		
+		case NOTCALLEDUNO:
+			image.setImageResource(R.drawable.info);
+			text.setText(R.string.t_notCalledUno);
+			break;
 			
 		default:
 			break;
@@ -521,7 +542,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		//		redrawCardsOnScrollView(cardsList);
 		addCardToHand(card);
 		if(setup){
-			Toast.makeText(this, "Got a card: "+card.toString(), Toast.LENGTH_SHORT).show();
+			showToast(DRAWCARDS);
+//			Toast.makeText(this, "Got a card: "+card.toString(), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -536,7 +558,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		}
 		if(ownTurn){
 			playerTurns[0].setVisibility(ImageView.VISIBLE);
-			Toast.makeText(this, "Your turn!", Toast.LENGTH_SHORT).show();
+			showToast(YOURTURN);
+//			Toast.makeText(this, "Your turn!", Toast.LENGTH_SHORT).show();
 		}
 		else{
 			for(ClientPlayer cp:clientLogic.getOtherPlayers()){
@@ -550,7 +573,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 					break;
 				}
 			}
-			Toast.makeText(this, "Not your turn!", Toast.LENGTH_SHORT).show();
+			showToast(OTHERPLAYER);
+//			Toast.makeText(this, "Not your turn!", Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -561,11 +585,29 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	public void handlePlayCard(Card card) {
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleplaycard");
+		if (card.getValue() == CardFaces.REVERSE){
+			turndirval *= -1;
+			turnDirImageSwitcher();
+		}
+	}
+	
+	public void turnDirImageSwitcher(){
+		switch (turndirval) {
+		case -1:
+			turndir.setImageResource(R.drawable.turn_gegenuhrzeigersinn);
+			break;
+		case 1:
+			turndir.setImageResource(R.drawable.turn_uhrzeigersinn);
+			break;
+		default:
+			break;
+		}
 	}
 
 	public void handleDrawCard() {
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handledrawcard");
-		Toast.makeText(this, "Took a card", Toast.LENGTH_SHORT).show();
+		showToast(DRAWCARDS);
+//		Toast.makeText(this, "Took a card", Toast.LENGTH_SHORT).show();
 	}
 
 	public void handleCallUno() {
@@ -579,7 +621,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	public void handlePlayerAccused() {
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handlePlayerAccused");
-		Toast.makeText(this, "Didn't call uno! Have some cards.", Toast.LENGTH_SHORT).show();
+		showToast(NOTCALLEDUNO);
+//		Toast.makeText(this, "Didn't call uno! Have some cards.", Toast.LENGTH_SHORT).show();
 	}
 	
 	public void handleUpdateQueue() {

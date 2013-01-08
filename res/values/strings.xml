@@ -12,6 +12,12 @@
     <string name="t_cannotPlayCard">Cannot play this card! Check color!</string>
     <string name="t_cannotPlayCardOtherPlayersTurn">It is another players turn!</string>
     <string name="t_gameWon">You have won the game, congrats ^(^.^)^!</string>
+    <string name="t_yourTurn">Your turn!</string>
+    <string name="t_gotCard">Draw Card(s)!</string>
+    <string name="t_notCalledUno">You did not called UNO, draw cards!</string>
+    <string name="t_wait">Wait for other players move!</string>
     <string name="game_cards">Cards: </string>
     <string name="blank"> </string>    
+    <string name="caption_wificlient">Choose WiFi Hot Spot</string>
+    <string name="caption_lobby">Game Lobby</string>
 </resources>

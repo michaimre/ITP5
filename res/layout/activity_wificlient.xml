@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent" 
+    android:background="@drawable/background"
+    android:padding="5dp">
 
     <Button
         android:id="@+id/b_searchSpots"
@@ -9,7 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:text="Search HotSpots" />
+        android:text="Search HotSpots" 
+        style="@style/button"/>
 
     <ListView
         android:id="@+id/lv_hotSpots"
@@ -17,6 +20,20 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/b_searchSpots"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" />
+        android:layout_below="@+id/textView1"
+        android:layout_marginBottom="5dp"
+        android:cacheColorHint="#00000000" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="5dp"
+        android:text="@string/caption_wificlient"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#000000"
+        android:textStyle="bold" />
 
 </RelativeLayout>

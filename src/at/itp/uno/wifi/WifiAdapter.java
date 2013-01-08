@@ -3,6 +3,7 @@ package at.itp.uno.wifi;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,8 +35,9 @@ public class WifiAdapter extends ArrayAdapter<ScanResult> {
 	            ScanResult result = this.hotSpotList.get(position); //Produce a row for each device
 	            if (result != null) {
 	                    TextView tv = (TextView)row.findViewById(android.R.id.text1);
+	                    tv.setTextColor(Color.BLACK);
 	                    if (tv != null) {
-	                          tv.setText(result.toString());
+	                          tv.setText(result.SSID.toString());
 	                    }
 	            }
 	            return row;
