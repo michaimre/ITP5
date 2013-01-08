@@ -4,8 +4,8 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,8 +21,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
-import at.itp.uno.activity.Activity_ServerGame.DialogItemListener_color;
-import at.itp.uno.activity.Activity_ServerGame.DialogItemListener_game;
 import at.itp.uno.wifi.WifiAdapter;
 import at.itp_uno_wifi_provider.R;
 

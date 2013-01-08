@@ -167,6 +167,10 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		clientUI.showDebug("Lobby loop start");
 		//TODO playername here!
 		String playername = "Player";
+		
+		int pni = 0;
+		String names[] = new String[]{"Koarl", "Gustl", "Hansi"};
+		
 		listening = Boolean.TRUE;
 		try {
 			if(activity!=null && host.compareToIgnoreCase("localhost")!=0){
@@ -177,7 +181,8 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 				}
 				while (netInfo == null || !netInfo.isConnected());
 			}
-			self = new ClientPlayer(new UnoSocketWrapper(new Socket(host, port), 0), playername);
+			self = new ClientPlayer(new UnoSocketWrapper(new Socket(host, port), 0), names[pni]);
+			pni = (pni+1)%3;
 			clientLobbyUI.playerJoined(self);
 			clientUI.showDebug("Self is: "+self.getId()+" ,"+self.getName());
 			while(listening){
