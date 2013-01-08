@@ -74,9 +74,7 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 		lv_players.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		b_startGame = (Button)findViewById(R.id.b_startGame);
 		b_startGame.setOnClickListener(this);
-		b_main = (Button)findViewById(R.id.b_main);
 		b_main.setOnClickListener(this);
-		b_debug = (Button)findViewById(R.id.b_ldebug);
 		b_debug.setOnClickListener(this);
 		b_debug.setVisibility(ImageView.INVISIBLE);
 		_spieler = new ArrayList<String>();
