@@ -3,18 +3,26 @@ package at.itp.uno.activity;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+import at.itp.uno.activity.Activity_ServerGame.DialogItemListener_color;
+import at.itp.uno.activity.Activity_ServerGame.DialogItemListener_game;
 import at.itp.uno.wifi.WifiAdapter;
 import at.itp_uno_wifi_provider.R;
 
@@ -23,6 +31,7 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 	private Button b_searchSpots;
 	private ListView lv_hotSpots;
 	private WifiManager wifi_m;
+	private String password; 
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,6 +70,8 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 			Log.v("Configs", wifi.toString());
 			
 		}*/
+			
+			showDialog(0);
 	
 			config.SSID = "\"" + hotSpot.SSID + "\""; //"\"SSIDName\"";
 			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
@@ -118,7 +129,39 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 	}
 	
 	public String intToIp(int i) {
+		return  ( i & 0xFF) + "." + ((i >> 8 ) & 0xFF)   + "." +   ((i >> 16 ) & 0xFF) + "." + ((i >> 24 ) & 0xFF ) ;
+	}
+	
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		Builder alertBuilder = new AlertDialog.Builder(this);
+		alertBuilder.setCancelable(true);
+		alertBuilder.setTitle("Enter WiFi Password:");
+		
+		EditText et = new EditText(this);
+		et.setTransformationMethod(PasswordTransformationMethod.getInstance());
+		
+		alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
+		});
+		
+		alertBuilder.setIcon(R.drawable.app_icon);
+		
+		AlertDialog dialog = alertBuilder.create(); 
+		dialog.show();
+		return super.onCreateDialog(id);
+	}
+	
+	public String getPassword() {
+		return password;
+	}
 
-		   return  ( i & 0xFF) + "." + ((i >> 8 ) & 0xFF)   + "." +   ((i >> 16 ) & 0xFF) + "." + ((i >> 24 ) & 0xFF ) ;
-		}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 }

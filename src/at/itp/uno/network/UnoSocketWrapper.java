@@ -5,6 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import android.util.Log;
+import at.itp.uno.network.protocol.ProtocolMessages;
+
 public class UnoSocketWrapper{
 	
 	private static final char BS = (char)8;
@@ -34,6 +37,7 @@ public class UnoSocketWrapper{
 	}
 	
 	public void write(int msg) throws IOException{
+		Log.d("SOCKET", "Write: "+ProtocolMessages.getMessageString(msg));
 		out.writeInt(msg);
 		out.flush();
 //		int i;
@@ -43,6 +47,7 @@ public class UnoSocketWrapper{
 	}
 	
 	public void write(String msg) throws IOException{
+		Log.d("SOCKET", "Write: "+msg);
 		out.write(BS);
 		out.write(msg.getBytes());
 		out.write(ESC);
@@ -57,6 +62,7 @@ public class UnoSocketWrapper{
 		int value = in.readInt();
 //		out.writeInt(ProtocolMessages.GM_ACK);
 //		out.flush();
+		Log.d("SOCKET", "read: "+ProtocolMessages.getMessageString(value));
 		return value;
 	}
 	
@@ -71,6 +77,7 @@ public class UnoSocketWrapper{
 		}
 //		out.writeInt(ProtocolMessages.GM_ACK);
 //		out.flush();
+		Log.d("SOCKET", "read: "+line.toString());
 		return line.toString();
 	}
 	
