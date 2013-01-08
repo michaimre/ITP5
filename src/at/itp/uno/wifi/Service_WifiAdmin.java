@@ -1,11 +1,8 @@
 package at.itp.uno.wifi;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -16,10 +13,9 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Parcel;
-import android.os.RemoteException;
 import android.util.Log;
+import at.itp.uno.server.core.ServerLogic;
+import at.itp.uno.server.ui.AndroidLogUI;
 
 public class Service_WifiAdmin extends Service {
 	
@@ -28,6 +24,8 @@ public class Service_WifiAdmin extends Service {
 	ServerSocket serverSocket = null;
 	ArrayList<Socket> clientSockets = null; //Die Client Sockets Liste muss m�glicherweise gelockt werden (m�glicher Datenzugriffkonflikt?)
 	private Thread_WaitingForClientConnections thread_WaitingForClients = null;
+	private ServerLogic serverLogic;
+	private Thread logicthread;
 	
 	@Override
 	public void onCreate() {
@@ -36,16 +34,22 @@ public class Service_WifiAdmin extends Service {
 		wifi_m.createWifiLock(1, "WifiLock");
 		Log.d("Service_Wifi_Admin -->","OnCreate");
 		clientSockets = new ArrayList<Socket>();
-		 
 	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if(startServerSocket()){
-			thread_WaitingForClients = new Thread_WaitingForClientConnections();
-			thread_WaitingForClients.start();
-			Log.i("Service", "OnStartCommand --> finished");
+		try {
+			serverLogic = new ServerLogic(new ServerSocket(30600), 30600, new AndroidLogUI());
+			logicthread = new Thread(serverLogic);
+			logicthread.start();
+		} catch (IOException e) {
+			Log.e("UNO service", e.getMessage());
 		}
+		//if(startServerSocket()){
+			//thread_WaitingForClients = new Thread_WaitingForClientConnections();
+			//thread_WaitingForClients.start();
+			Log.i("Service", "OnStartCommand --> finished");
+		//}
 		// The service is starting, due to a call to startService()
 		return START_NOT_STICKY;
 	}
@@ -76,6 +80,9 @@ public class Service_WifiAdmin extends Service {
 	@Override
 	public void onDestroy() {
 		// The service is no longer used and is being destroyed
+		if(serverLogic.isLobbyOpen()){
+			serverLogic.closeLobby();
+		}
 	}
 
 	
@@ -109,7 +116,25 @@ public class Service_WifiAdmin extends Service {
 			//send message to one specific player
 			return sendUnoMessage(playerSocket,message);
 		}
+		
+		public void kickPlayer(){
+//			serverLogic.kickPlayer()
+		}
+
+		public void addDebugPlayers() {
+			serverLogic.addDebugPlayers();
+		}
+
+		public void startGame(ArrayList<String> checkedPlayers) {
+			serverLogic.retainPlayers(checkedPlayers);
+			serverLogic.startGame();
+		}
 				
+		public void stopLogic(){
+			serverLogic.stopLogic();
+			logicthread.stop();
+			serverLogic = null;
+		}
 	}
 	
 	//Thread der die Socketverbindungen zu den Clients aufbaut
@@ -144,7 +169,6 @@ public class Service_WifiAdmin extends Service {
 		}
 		
 	}
-	
 	
 	private Integer sendUnoBroadcast(String message){
 		//send message to all Players

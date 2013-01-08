@@ -108,7 +108,8 @@ public class ServerPlayer extends Player{
 	}
 
 	public void endTurn() throws IOException {
-		socket.write(ProtocolMessages.GTM_ENDOFTURN);
+		//socket.write(ProtocolMessages.GTM_ENDOFTURN);
+		socket.setTimeout(UnoSocketWrapper.TIMEOUT);
 	}
 
 	public int getAccusedPlayer() throws IOException {
@@ -150,8 +151,10 @@ public class ServerPlayer extends Player{
 	}
 
 	public void sendPlayedCardResult(boolean validAction) throws IOException {
-		socket.write(ProtocolMessages.GTM_PLAYRESULT);
 		socket.write((validAction)?ProtocolMessages.GTM_VALIDPLAY:ProtocolMessages.GTM_INVALIDPLAY);
 	}
 
+	public void gameWon() throws IOException {
+		socket.write(ProtocolMessages.GTM_GAMEWON);
+	}
 }

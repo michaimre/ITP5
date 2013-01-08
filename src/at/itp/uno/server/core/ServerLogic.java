@@ -4,33 +4,46 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 
+import android.util.Log;
 import at.itp.uno.data.ServerPlayer;
+import at.itp.uno.gamelogic.DummyPlayer;
 import at.itp.uno.gamelogic.GameTable;
 import at.itp.uno.network.SocketFactory;
 import at.itp.uno.network.UnexpectedPlayerResponseEception;
 import at.itp.uno.network.UnoSocketWrapper;
 import at.itp.uno.network.protocol.ProtocolMessages;
 import at.itp.uno.server.ServerUI;
+import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
 
 public class ServerLogic implements Runnable{
 
+	public static boolean RUNNING = false;
+	
 	private ServerUI serverUI;
 	private ServerSocket serverSocket;
-	private SocketFactory socketFactory;
 	private LobbyAdminListener lobbyAdminListener;
 	private int port;
+	private boolean lobbyOpen, forcestop;
 
 	private boolean gameStarted;
 
 	private GameTable gameTable;
 
-	public ServerLogic(SocketFactory socketFactory, int port, ServerUI serverUI){
+	public ServerLogic(SocketFactory socketFactory, int port, ServerUI serverUI) throws IOException{
+		this(socketFactory.createServerSocket(port), port, serverUI);
+	}
+
+	public ServerLogic(ServerSocket serverSocket, int port, ServerUI serverUI){
+		RUNNING = true;
 		this.serverUI=serverUI;
-		this.socketFactory=socketFactory;
 		this.port=port;
+		this.serverSocket = serverSocket;
 
 		gameStarted = false;
+		lobbyOpen = false;
+		forcestop = false;
 
 		gameTable = new GameTable(serverUI);
 	}
@@ -51,6 +64,7 @@ public class ServerLogic implements Runnable{
 		//Open server, gather players
 		lobbySetup();
 		if(gameStarted){
+			gameTable.startGame();
 			//Set up table and players
 			gameTable.setUpGame();
 			//Do game stuff
@@ -74,14 +88,15 @@ public class ServerLogic implements Runnable{
 	 */
 	private void lobbySetup(){
 		serverUI.showMessage("Starting lobby setup");
+		lobbyOpen = true;
 		try {
-			serverSocket = socketFactory.createServerSocket(port);
-			serverUI.showMessage("Waiting for admin connection");
-			lobbyAdminListener = new LobbyAdminListener(this, new UnoSocketWrapper(serverSocket.accept(), 0));
-			new Thread(lobbyAdminListener).start();
-			serverUI.showMessage("Admin connected");
+			//serverSocket = socketFactory.createServerSocket(port);
+			//			serverUI.showMessage("Waiting for admin connection");
+			//			lobbyAdminListener = new LobbyAdminListener(this, new UnoSocketWrapper(serverSocket.accept(), 0));
+			//			new Thread(lobbyAdminListener).start();
+			//			serverUI.showMessage("Admin connected");
 			int cid = 1;
-			while(!serverSocket.isClosed()){
+			while(!serverSocket.isClosed() && !forcestop){
 				try{
 					//TODO timeout set to 0 while in lobby
 					serverUI.showMessage("Waiting for player to join");
@@ -101,16 +116,17 @@ public class ServerLogic implements Runnable{
 					startGame();
 				}
 			}
-			lobbyAdminListener.closeSocket();
+			//lobbyAdminListener.closeSocket();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		lobbyOpen = false;
 	}
 
 	public void startGame() {
 		serverUI.showMessage("Lobby closing, game starting");
-		closeServerSocket();
 		gameStarted = true;
+		closeServerSocket();
 	}
 
 	public boolean kickPlayer(int playerID) {
@@ -120,11 +136,14 @@ public class ServerLogic implements Runnable{
 	}
 
 	public void closeLobby() {
-		closeServerSocket();
-		synchronized(gameTable){
-			gameTable.closeTable();
+		if(lobbyOpen){
+			closeServerSocket();
+			synchronized(gameTable){
+				gameTable.closeTable();
+			}
+			gameStarted = false;
+			lobbyOpen = false;
 		}
-		gameStarted = false;
 	}
 
 	/////////////
@@ -132,10 +151,10 @@ public class ServerLogic implements Runnable{
 	/////////////
 
 	public void gameLoop(){
-		boolean endofturn = Boolean.FALSE;
 		serverUI.showMessage("Starting game loop");
 		ServerPlayer currentPlayer = null;
-		while((currentPlayer = gameTable.nextTurn())!=null){
+		while(!forcestop && (currentPlayer = gameTable.nextTurn())!=null){
+			boolean endofturn = Boolean.FALSE;
 			serverUI.showMessage("Next player: "+currentPlayer.toString());
 			try {
 				if(gameTable.getCardsToDraw()>0){
@@ -145,7 +164,7 @@ public class ServerLogic implements Runnable{
 						gameTable.forceDraw(currentPlayer);
 					}
 					else{
-						while(!endofturn){
+						while(!forcestop && !endofturn){
 							serverUI.showMessage("Waiting for player decision");
 							int action = currentPlayer.getAction();
 							switch(action){
@@ -172,7 +191,7 @@ public class ServerLogic implements Runnable{
 					}
 				}
 				else{
-					while(!endofturn){
+					while(!forcestop && !endofturn){
 						serverUI.showMessage("Waiting for player action");
 						int action = currentPlayer.getAction();
 						switch(action){
@@ -225,6 +244,31 @@ public class ServerLogic implements Runnable{
 			gameTable.endTurn();
 		}
 		gameTable.endGame();
+	}
+
+	public void addDebugPlayers() {
+		new DummyPlayer(port);
+		new DummyPlayer(port);
+	}
+
+	public void retainPlayers(ArrayList<String> checkedPlayers) {
+		gameTable.retainPlayers(checkedPlayers);
+	}
+
+	public boolean isLobbyOpen() {
+		return lobbyOpen;
+	}
+
+	public void stopLogic(){
+		try {
+			forcestop = true;
+			if(serverSocket != null && !serverSocket.isClosed()) serverSocket.close();
+			gameTable.purge();
+			RUNNING = false;
+		} catch (IOException e) {
+			Log.d("UNO server", "force stopping, don't mind me");
+			Log.e("UNO server", e.getMessage());
+		}
 	}
 }
 

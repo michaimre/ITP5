@@ -1,8 +1,10 @@
 package at.itp.uno.data;
 
+import java.io.Serializable;
 
 
-public class Card implements Comparable<Card>{
+
+public class Card implements Comparable<Card>, Serializable{
 	
 	private short face;
 	

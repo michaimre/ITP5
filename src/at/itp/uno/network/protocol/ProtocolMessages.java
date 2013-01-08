@@ -41,6 +41,7 @@ public class ProtocolMessages {
 	public static final int GTM_SKIPPLAYER = 315;
 	public static final int GTM_SETWILDCOLOR = 316;
 	public static final int GTM_FORCEDRAW = 317;
+	public static final int GTM_GAMEWON = 318;
 	
 	public static String getMessageString(int code){
 		String ret;
@@ -147,6 +148,10 @@ public class ProtocolMessages {
 				
 			case GTM_FORCEDRAW:
 				ret = "GTM_FORCEDRAW";
+				break;
+				
+			case GTM_GAMEWON:
+				ret = "GTM_GAMEWON";
 				break;
 				
 			default:

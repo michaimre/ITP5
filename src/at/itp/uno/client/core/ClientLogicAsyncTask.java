@@ -1,4 +1,4 @@
-package at.itp.uno.wifi;
+package at.itp.uno.client.core;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -18,34 +18,14 @@ import android.util.Log;
 import android.widget.EditText;
 import at.itp.uno.activity.Activity_ClientGame;
 
-/* Diese Klasse, dieser AsyncTast baut einen Client Socket zum Server auf, und wandert dann in eine Schleife und erwartet solange eine
- * Verbindung zum ServerSocket besteht eine Nachricht und antwortet auf diese
- */
+public class ClientLogicAsyncTask extends AsyncTask<String,String,String>{
 
-public class Client_AsyncTask extends AsyncTask <String, String, String> {
 	private Activity _activity;
 	private Context _context;
 	private Socket socket = new Socket();
 	private EditText et_spielerName = null;
 	
-	
-	
-	public Client_AsyncTask(Context c, Activity a, EditText spielerName){
-		_context = c;
-		_activity = a;
-		et_spielerName = spielerName;
-		
-		try {
-			socket.bind(null);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
-	
-	
-	public Client_AsyncTask(Context c, Activity a){
+	public ClientLogicAsyncTask(Context c, Activity a){
 		_context = c;
 		_activity = a;
 		try {
@@ -54,7 +34,6 @@ public class Client_AsyncTask extends AsyncTask <String, String, String> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 	
 	@Override

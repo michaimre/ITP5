@@ -1,7 +1,5 @@
 package at.itp.uno.network;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -14,7 +12,7 @@ public class UnoSocketWrapper{
 	private static final char BS = (char)8;
 	private static final char ESC = (char)27;
 	public static final int TIMEOUT = 0; //15*1000; TODO change this before releasing ffs
-	public static final int EOTTIMEOUT = 5*1000;
+	public static final int EOTTIMEOUT = 2*1000;
 	
 	private short state;
 	private Socket socket;
@@ -40,9 +38,10 @@ public class UnoSocketWrapper{
 	public void write(int msg) throws IOException{
 		out.writeInt(msg);
 		out.flush();
-		if(in.readInt()!=ProtocolMessages.GM_ACK){
-			throw new UnexpectedPlayerResponseEception("GM_ACK expected");
-		}
+//		int i;
+//		if((i=in.readInt())!=ProtocolMessages.GM_ACK){
+//			throw new UnexpectedPlayerResponseEception("GM_ACK expected, got "+ProtocolMessages.getMessageString(i));
+//		}
 	}
 	
 	public void write(String msg) throws IOException{
@@ -50,15 +49,16 @@ public class UnoSocketWrapper{
 		out.write(msg.getBytes());
 		out.write(ESC);
 		out.flush();
-		if(in.readInt()!=ProtocolMessages.GM_ACK){
-			throw new UnexpectedPlayerResponseEception("GM_ACK expected");
-		}
+//		int i;
+//		if((i=in.readInt())!=ProtocolMessages.GM_ACK){
+//			throw new UnexpectedPlayerResponseEception("GM_ACK expected, got "+ProtocolMessages.getMessageString(i));
+//		}
 	}
 	
 	public int read() throws IOException{
 		int value = in.readInt();
-		out.writeInt(ProtocolMessages.GM_ACK);
-		out.flush();
+//		out.writeInt(ProtocolMessages.GM_ACK);
+//		out.flush();
 		return value;
 	}
 	
@@ -71,8 +71,8 @@ public class UnoSocketWrapper{
 		while((c=(char) in.read())!=ESC){
 			line.append(c);
 		}
-		out.writeInt(ProtocolMessages.GM_ACK);
-		out.flush();
+//		out.writeInt(ProtocolMessages.GM_ACK);
+//		out.flush();
 		return line.toString();
 	}
 	

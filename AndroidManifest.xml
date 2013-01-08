@@ -22,20 +22,22 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="at.itp.uno.activity.MainActivity"
-            android:label="@string/title_activity_main" />
-        <activity android:name="at.itp.uno.activity.Activity_WifiServer" />
-        <activity android:name="at.itp.uno.activity.Activity_WifiClient" />
-
-        <service android:name="at.itp.uno.wifi.Service_WifiAdmin" />
-
-        <activity android:name="at.itp.uno.activity.Activity_ClientGame" />
-        <activity android:name="at.itp.uno.activity.Activity_ServerGame" >
+            android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+            </activity>
+        <activity android:name="at.itp.uno.activity.Activity_WifiServer" />
+        <activity android:name="at.itp.uno.activity.Activity_WifiClient" />
+
+        
+        <service android:name="at.itp.uno.wifi.Service_WifiAdmin" />
+
+        <activity android:name="at.itp.uno.activity.Activity_ClientGame" />
+        <activity android:name="at.itp.uno.activity.Activity_ServerGame" />
+        <activity android:name="at.itp.uno.activity.Activity_Lobby"></activity>
     </application>
 
 </manifest>

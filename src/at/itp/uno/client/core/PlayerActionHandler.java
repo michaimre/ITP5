@@ -2,17 +2,11 @@ package at.itp.uno.client.core;
 
 import java.io.IOException;
 
-import at.itp.uno.client.ClientUI;
+import android.os.AsyncTask;
 import at.itp.uno.data.Card;
 import at.itp.uno.data.Player;
 
-public abstract class PlayerActionHandler {
-	
-	protected ClientUI clientUI;
-	
-	public PlayerActionHandler(ClientUI clientUI){
-		this.clientUI=clientUI;
-	}
+public abstract class PlayerActionHandler{
 	
 	//Lobby actions
 	public abstract boolean joinGame(String host, int port);
@@ -20,7 +14,7 @@ public abstract class PlayerActionHandler {
 	public abstract void startGame();
 	
 	//Game actions
-	public abstract void playCard(Card card) throws IOException;
+	public abstract boolean playCard(Card card) throws IOException;
 	public abstract void drawCard() throws IOException;
 	public abstract void callUno() throws IOException;
 	public abstract void accusePlayer(Player player) throws IOException;

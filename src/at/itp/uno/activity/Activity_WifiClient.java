@@ -5,7 +5,6 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -15,8 +14,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 import at.itp.uno.wifi.WifiAdapter;
-import at.itp.uno.wifi.Wifi_Broadcastreceiver;
 import at.itp_uno_wifi_provider.R;
 
 public class Activity_WifiClient extends Activity implements Button.OnClickListener , ListView.OnItemClickListener{
@@ -24,8 +23,6 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 	private Button b_searchSpots;
 	private ListView lv_hotSpots;
 	private WifiManager wifi_m;
-	private Wifi_Broadcastreceiver wifi_br = null;
-	private IntentFilter wifi_if = null;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,23 +35,26 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
         wifi_m = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         if(wifi_m.isWifiEnabled()){
           wifi_m.setWifiEnabled(false);
-        }else{
+        }
+        else{
           wifi_m.setWifiEnabled(true);
         }
-        
-        wifi_if = new IntentFilter();
-        wifi_if.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-        wifi_if.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         wifi_m.createWifiLock(1, "WifiLock");
-        
-        
     }
 
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
 		ScanResult hotSpot = (ScanResult) lv_hotSpots.getAdapter().getItem(position);
-		WifiConfiguration config = new WifiConfiguration();
+		
+		Log.d("WifiPreference", "capabs " + hotSpot.capabilities );
+		if(!hotSpot.capabilities.startsWith("[WPA-")){
+			Toast toast = Toast.makeText(this, "Not a valid Uno HotSpot, WPA Security required", Toast.LENGTH_LONG);
+			toast.show();
+		}
+		else{
+			WifiConfiguration config = new WifiConfiguration();
+
 		
 		/*List<WifiConfiguration> configList = wifi_m.getConfiguredNetworks();
 		for(WifiConfiguration wifi : configList){
@@ -62,31 +62,38 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 			
 		}*/
 	
-		config.SSID = "\"" + hotSpot.SSID + "\""; //"\"SSIDName\"";
-		//config.preSharedKey  ="\"samsamsam\"";
-		config.hiddenSSID = false;
-		config.status = WifiConfiguration.Status.ENABLED;        
-		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-		config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-		config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-		config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-		config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-		//wifi_m.removeNetwork(0);
-		//wifi_m.disconnect();
-		
-		int res = wifi_m.addNetwork(config);
-		boolean networkEnabled = wifi_m.enableNetwork(res, true); 
-		
-		//for(int x=0; x <900;x++){ Log.v("s","sd"+x);}
-		Log.d("WifiPreference", "add Network returned " + res );
-		Log.d("WifiPreference", "enableNetwork returned " + networkEnabled );
-		Log.d("WifiPreference", "enableNetwork returned " + wifi_m.getConnectionInfo().toString());
-		Log.d("WifiPreference", "enableNetwork returned " + wifi_m.getDhcpInfo());
-		Log.d("WifiPreference", "enableNetwork returned " + wifi_m.pingSupplicant());
-		if(networkEnabled){
-			Intent i = new Intent(this,Activity_ClientGame.class);
-			startActivity(i);
+			config.SSID = "\"" + hotSpot.SSID + "\""; //"\"SSIDName\"";
+			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+			config.preSharedKey  ="\"samsamsam\"";
+			config.hiddenSSID = false;
+			config.status = WifiConfiguration.Status.ENABLED;        
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+	
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+	
+			//wifi_m.removeNetwork(0);
+			//wifi_m.disconnect();
+			
+			int res = wifi_m.addNetwork(config);
+			boolean networkEnabled = wifi_m.enableNetwork(res, true); 
+			
+			//for(int x=0; x <900;x++){ Log.v("s","sd"+x);}
+			Log.d("WifiPreference", "add Network returned " + res );
+			Log.d("WifiPreference", "enableNetwork returned " + networkEnabled );
+			Log.d("WifiPreference", "enableNetwork returned " + wifi_m.getConnectionInfo().toString());
+			Log.d("WifiPreference", "enableNetwork returned " + this.intToIp(wifi_m.getDhcpInfo().gateway));
+			Log.d("WifiPreference", "enableNetwork returned " + wifi_m.pingSupplicant());
+	
+			//TODO IP HERE
+			if(networkEnabled){
+				Intent i = new Intent(this, Activity_Lobby.class);
+				i.putExtra("AccessPointIP", this.intToIp(wifi_m.getDhcpInfo().gateway));
+				i.putExtra("textViewResourceId", android.R.layout.simple_list_item_1);
+				startActivity(i);
+			}
 		}
 	}
 
@@ -110,25 +117,8 @@ public class Activity_WifiClient extends Activity implements Button.OnClickListe
 		
 	}
 	
-	@Override
-    protected void onResume() {
-        super.onResume();
-        if(wifi_br != null)
-        {
-        	wifi_br = null;
-        }
-        
-        wifi_br = new Wifi_Broadcastreceiver(wifi_m , this);
-        //Registrieren des BroadcastReceivers mit dem erstellten intent Filter
-        Log.v("BroadcastReceiver","OnResume");
-        registerReceiver(wifi_br,wifi_if);
-    }
-    
-    @Override
-    protected void onPause() {
-        super.onPause();
-        /* unregister the broadcast receiver */
-        unregisterReceiver(wifi_br);
-    }
+	public String intToIp(int i) {
 
+		   return  ( i & 0xFF) + "." + ((i >> 8 ) & 0xFF)   + "." +   ((i >> 16 ) & 0xFF) + "." + ((i >> 24 ) & 0xFF ) ;
+		}
 }
