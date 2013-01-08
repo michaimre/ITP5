@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="game_menu_list_client">
+        <item>Sort Cards</item>
+        <item>Leave Game</item>
+    </string-array>
+</resources>

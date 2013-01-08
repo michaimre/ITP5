@@ -124,7 +124,8 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 				} 
 			}
 			
-			if(checkedPlayers.size()>1){
+			if(checkedPlayers.size()>0){
+//			if(checkedPlayers.size()>1){
 				_service.startGame(checkedPlayers);
 	
 				Intent i = new Intent(this,Activity_ServerGame.class);

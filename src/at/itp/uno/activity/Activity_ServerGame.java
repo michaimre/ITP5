@@ -147,7 +147,6 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		stapel_hin.setOnClickListener(this);
 		mischen.setOnClickListener(this);
 		uno.setOnClickListener(this);
-		turndir.setOnClickListener(this);
 
 		horizontalLayout = (LinearLayout) findViewById(R.id.scrollViewLinearLayout);
 		stapelLayout = (LinearLayout) findViewById(R.id.linearLayout_stapel);
@@ -157,8 +156,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 				View.MeasureSpec.makeMeasureSpec(0, 0));
 
 		layoutParams = new LinearLayout.LayoutParams(new Double(
-				0.60 * stapel_hin.getMeasuredWidth()).intValue(), new Double(
-						0.60 * stapel_hin.getMeasuredHeight()).intValue());
+				0.55 * stapel_hin.getMeasuredWidth()).intValue(), new Double(
+						0.55 * stapel_hin.getMeasuredHeight()).intValue());
 
 		stapel_ab.setLayoutParams(layoutParams);
 		stapel_hin.setLayoutParams(layoutParams);
