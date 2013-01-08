@@ -346,10 +346,14 @@ public class GameTable {
 	}
 
 	public void endTurn(){
-		for(ServerPlayer p:playerqueue){
+		for(int i=0;i<playerqueue.size();i++){
+			ServerPlayer p = playerqueue.get(i);
+//		for(ServerPlayer p:playerqueue){
 			try{
 				if(p.getCards()<=0){
 					p.gameWon();
+					playerqueue.remove(i);
+					i--;
 				}
 				else{
 					p.endTurn();

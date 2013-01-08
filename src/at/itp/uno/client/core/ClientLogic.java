@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.util.LinkedList;
 
-import android.R.bool;
 import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -21,7 +20,6 @@ import at.itp.uno.data.HandCards;
 import at.itp.uno.data.Player;
 import at.itp.uno.network.UnoSocketWrapper;
 import at.itp.uno.network.protocol.ProtocolMessages;
-import at.itp.uno.server.core.UnoServer;
 
 public class ClientLogic extends PlayerActionHandler implements Runnable, Serializable{
 
@@ -33,15 +31,14 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 
 	private String host;
 	private int port;
-	private boolean gameStarted, myTurn, validPlay, listening, gamewon;
+	private boolean gameStarted, validPlay, listening, gamewon;
 	private Thread logicThread;
-	private UnoServer unoServer; 
 	private ClientLobbyAdmin clientLobbyAdmin;
 	private Activity activity;
 
 	private ClientPlayer self;
 	private HandCards hand;
-	private Card topCard;
+//	private Card topCard;
 	private LinkedList<ClientPlayer> otherPlayers;
 
 	private ClientLobbyUI clientLobbyUI;
@@ -77,11 +74,9 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		this.port = 0;
 		otherPlayers = new LinkedList<ClientPlayer>();
 		hand = new HandCards();
-		myTurn = Boolean.FALSE;
 		gameStarted = Boolean.FALSE;
 		validPlay = Boolean.FALSE;
 		gamewon = Boolean.FALSE;
-		topCard = new Card((short)0);
 		logicThread = new Thread(this);
 	}
 
@@ -129,10 +124,11 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 	}
 
 	@Override
+	@Deprecated
 	public boolean openNewGameLobby(){
 		//TODO server port is here!
-		int port = 26000;
-		unoServer = new UnoServer(port);
+//		int port = 26000;
+//		unoServer = new UnoServer(port);
 		try {
 			clientLobbyAdmin = new ClientLobbyAdmin(clientUI);
 			clientLobbyAdmin.connectTo("localhost", port);
@@ -146,6 +142,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 	}
 
 	@Override
+	@Deprecated
 	public void startGame(){
 		clientLobbyAdmin.sendStartCommand();
 	}
@@ -173,7 +170,6 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		String playername = "Player";
 		listening = Boolean.TRUE;
 		try {
-			//TODO timeout set to 0 while in lobby
 			if(activity!=null && host.compareToIgnoreCase("localhost")!=0){
 				ConnectivityManager cm =(ConnectivityManager)activity.getSystemService(Context.CONNECTIVITY_SERVICE);
 				NetworkInfo netInfo = null;
@@ -313,7 +309,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		Card card = new Card((short) self.getSocket().read());
 		clientUI.showDebug("Receive top card: "+card.toString());
 		clientGameUI.receivedTopCard(card);
-		topCard = card;
+//		topCard = card;
 	}
 
 	private void startTurn() throws IOException {

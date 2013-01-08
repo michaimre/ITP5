@@ -124,10 +124,12 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 				} 
 			}
 			
-			_service.startGame(checkedPlayers);
-
-			Intent i = new Intent(this,Activity_ServerGame.class);
-			startActivity(i);	
+			if(checkedPlayers.size()>1){
+				_service.startGame(checkedPlayers);
+	
+				Intent i = new Intent(this,Activity_ServerGame.class);
+				startActivity(i);	
+			}
 		}
 		else if(v.equals(b_main)){
 
