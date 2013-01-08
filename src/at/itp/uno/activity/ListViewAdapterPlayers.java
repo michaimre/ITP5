@@ -3,6 +3,7 @@ package at.itp.uno.activity;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ public class ListViewAdapterPlayers extends ArrayAdapter<String> {
             String spieler = _spieler.get(position); //Produce a row for each spieler
             if (spieler != null) {
                     TextView tv = (TextView)row.findViewById(android.R.id.text1);
+                    tv.setTextColor(Color.BLACK);
                     if (tv != null) {
                           tv.setText(spieler);
                     }
