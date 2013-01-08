@@ -8,6 +8,10 @@ import java.util.Random;
 
 import android.R.string;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -41,6 +45,9 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private static final int NOTYOURTURN = 2;
 	private static final int GAMEWON = 3;
 
+	private static final int DIALOG_HOME = 1;
+	private static final int DIALOG_CHOOSE_COLOR = 2;
+	
 	private Button b_sendBroadcast;
 	private Binder_Service_WifiAdmin _service = null;
 	private ServiceConnection_Service_WifiAdmin connection = null;
@@ -57,6 +64,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private ImageView mischen; 
 	private ImageView uno; 
 	private ImageView turndir; 
+	private ImageView gameDialog; 
 	private ImageView[] playerTurns;
 	private TextView[] playerNames;
 
@@ -150,13 +158,15 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		mischen = (ImageView) findViewById(R.id.imageView_mischen);
 		uno = (ImageView) findViewById(R.id.imageView_uno);
 		turndir = (ImageView) findViewById(R.id.iv_turn_direction);
+		gameDialog = (ImageView) findViewById(R.id.imageView_gameDialog);
 		turndirval = CW;
 
 		stapel_ab.setOnClickListener(this);
 		stapel_hin.setOnClickListener(this);
 		mischen.setOnClickListener(this);
 		uno.setOnClickListener(this);
-
+		gameDialog.setOnClickListener(this);
+		
 		horizontalLayout = (LinearLayout) findViewById(R.id.scrollViewLinearLayout);
 		stapelLayout = (LinearLayout) findViewById(R.id.linearLayout_stapel);
 		horizontalLayout.setOnClickListener(this);
@@ -185,8 +195,10 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 			try {
 				if (v.equals(stapel_ab)) {
 					clientLogic.drawCard();
-				} else if(v.equals(uno)){
+				} else if(v.equals(uno)) {
 					clientLogic.callUno();
+				} else if (v.equals(gameDialog)){						
+					
 				} else {
 					int j = horizontalLayout.indexOfChild(v);
 					if(clientLogic.playCard(cardsList.get(j))){
@@ -206,6 +218,47 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		}
 	}
 
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		Builder alertBuilder = new AlertDialog.Builder(this);
+		alertBuilder.setTitle("Game Menu");
+		alertBuilder.setCancelable(true);
+
+		switch (id) {
+		case 1:
+			alertBuilder.setItems(R.array.game_menu_list_server, new DialogItemListener());	
+			break;
+		case 2: 
+			alertBuilder.setItems(R.array.game_menu_list_client, new DialogItemListener());
+			break;
+		default:
+			alertBuilder.setItems(R.array.game_menu_list_server, new DialogItemListener());	
+			break;
+		}
+		
+		alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
+		});
+		
+		alertBuilder.setIcon(R.drawable.app_icon);
+		
+		AlertDialog dialog = alertBuilder.create(); 
+		dialog.show();
+		return super.onCreateDialog(id);
+	}
+	
+	private final class DialogItemListener implements DialogInterface.OnClickListener{
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			if (which == 0){
+				sortCards(cardsList);
+			}
+		}
+	}
+	
 	private void showToast(int param) {
 		LayoutInflater inflater = getLayoutInflater();
 		View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_root));
