@@ -143,5 +143,23 @@ public class DummyPlayer extends Thread implements ClientLobbyUI, ClientGameUI{
 	public void playerAccused() {
 		Log.d("UNO Dummy"+myid, "playeraccused");
 	}
+
+	@Override
+	public void updateQueue() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void forceDraw() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void drawTwo() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

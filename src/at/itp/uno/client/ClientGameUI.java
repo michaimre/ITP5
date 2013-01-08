@@ -1,7 +1,6 @@
 package at.itp.uno.client;
 
 import at.itp.uno.data.Card;
-import at.itp.uno.data.ClientPlayer;
 
 public interface ClientGameUI extends ClientUI{
 
@@ -14,5 +13,8 @@ public interface ClientGameUI extends ClientUI{
 	public void callUno();
 	public void gameWon();
 	public void playerAccused();
+	public void updateQueue();
+	public void forceDraw();
+	public void drawTwo();
 	
 }

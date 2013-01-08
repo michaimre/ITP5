@@ -5,8 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import at.itp.uno.network.protocol.ProtocolMessages;
-
 public class UnoSocketWrapper{
 	
 	private static final char BS = (char)8;

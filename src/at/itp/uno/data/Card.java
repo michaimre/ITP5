@@ -5,6 +5,8 @@ import java.io.Serializable;
 
 
 public class Card implements Comparable<Card>, Serializable{
+
+	private static final long serialVersionUID = -707012000783132852L;
 	
 	private short face;
 	

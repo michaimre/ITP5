@@ -5,8 +5,6 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
-import at.itp.uno.activity.Activity_Lobby;
-import at.itp.uno.activity.Activity_ServerGame;
 import at.itp.uno.activity.ServiceBindable;
 import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
 

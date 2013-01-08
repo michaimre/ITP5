@@ -3,10 +3,7 @@ package at.itp.uno.activity;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,8 +28,6 @@ public class Activity_Lobby extends Activity implements Button.OnClickListener, 
 	private ListView lv_players;
 	private Button b_startGame, b_main, b_debug;
 	private ArrayList<String> _spieler;
-	private WifiManager wifi_m;
-	private Intent i = null;
 	private Binder_Service_WifiAdmin _service = null;
 	private ServiceConnection_Service_WifiAdmin connection = null;
 	private ClientLogic clientLogic;

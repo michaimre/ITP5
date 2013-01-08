@@ -3,7 +3,6 @@ package at.itp.uno.activity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -26,7 +25,6 @@ import android.widget.Toast;
 import at.itp.uno.client.ClientGameUI;
 import at.itp.uno.client.core.ClientLogic;
 import at.itp.uno.data.Card;
-import at.itp.uno.data.CardFaces;
 import at.itp.uno.data.CardToResourceId;
 import at.itp.uno.data.ClientPlayer;
 import at.itp.uno.network.protocol.ProtocolMessages;
@@ -63,7 +61,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private TextView[] playerNames;
 
 	private ClientLogic clientLogic;
-	private boolean myTurn, turndirval;
+	private boolean myTurn, turndirval, setup;
 
 	/** Handles UI updates
 	 *  Receives messages from the logic thread
@@ -96,6 +94,9 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 				handlePlayerAccused();
 				break;
 				
+			case ProtocolMessages.LM_STARTOFPLAYERLIST:
+				break;
+				
 			default:
 				break;
 			}
@@ -114,6 +115,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 		cardsList = new ArrayList<Card>();
 		myTurn = false;
+		setup = false;
 
 		clientLogic = ClientLogic.getInstance();
 		clientLogic.setClientGameUI(this);
@@ -169,6 +171,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		stapel_ab.setLayoutParams(layoutParams);
 		stapel_hin.setLayoutParams(layoutParams);
 		drawCardsOnScrollView(cardsList);
+		
+		setup = true;
 	}
 
 	@Override
@@ -194,7 +198,6 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 					}
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -356,13 +359,11 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	@Override
 	public void doAction() {
-		//TODO fancy "your turn" animation
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "doaction");
 	}
 
 	@Override
 	public void playCard(Card card) {
-		//TODO fancy "card played" animation"
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "playcard");
 		Message msg = new Message();
 		msg.arg1 = ProtocolMessages.GTM_PLAYCARD;
@@ -372,13 +373,11 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	@Override
 	public void drawCard() {
-		//TODO fancy "draw card" animation
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "drawcard");
 	}
 
 	@Override
 	public void callUno() {
-		//TODO fancy "uno called" animation
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "calluno");
 	}
 
@@ -398,6 +397,30 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		handler.sendMessage(msg);
 	}
 
+	@Override
+	public void updateQueue() {
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "updateQueue");
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.LM_STARTOFPLAYERLIST;
+		handler.sendMessage(msg);
+	}
+
+	@Override
+	public void forceDraw() {
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "forceDraw");
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.GTM_FORCEDRAW;
+		handler.sendMessage(msg);
+	}
+
+	@Override
+	public void drawTwo() {
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "drawTwo");
+		Message msg = new Message();
+		msg.arg1 = ProtocolMessages.GTM_DRAWTWO;
+		handler.sendMessage(msg);
+	}
+
 	/////
 	//Handler methods
 	/////
@@ -407,6 +430,9 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		//		sortCards(cardsList);
 		//		redrawCardsOnScrollView(cardsList);
 		addCardToHand(card);
+		if(setup){
+			Toast.makeText(this, "Got a card: "+card.toString(), Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	public void handleReceivedTopCard(Card card) {
@@ -420,6 +446,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		}
 		if(ownTurn){
 			playerTurns[0].setVisibility(ImageView.VISIBLE);
+			Toast.makeText(this, "Your turn!", Toast.LENGTH_SHORT).show();
 		}
 		else{
 			for(ClientPlayer cp:clientLogic.getOtherPlayers()){
@@ -433,47 +460,53 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 					break;
 				}
 			}
+			Toast.makeText(this, "Not your turn!", Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	public void handleDoAction() {
-		// TODO Auto-generated method stub
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handledoaction");
+		Toast.makeText(this, "Did action", Toast.LENGTH_SHORT).show();
 	}
 
 	public void handlePlayCard(Card card) {
-		// TODO Auto-generated method stub
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleplaycard");
-//		if(card.getValue() == CardFaces.REVERSE){
-//			if(turndirval){
-//				turndirval = CCW;
-//				turndir.setImageResource(R.drawable.turn_gegenuhrzeigersinn);
-//			}
-//			else{
-//				turndirval = CW;
-//				turndir.setImageResource(R.drawable.turn_uhrzeigersinn);
-//			}
-//		}
 	}
 
 	public void handleDrawCard() {
-		// TODO Auto-generated method stub
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handledrawcard");
+		Toast.makeText(this, "Took a card", Toast.LENGTH_SHORT).show();
 	}
 
 	public void handleCallUno() {
-		// TODO Auto-generated method stub
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handlecalluno");
 	}
 
 	public void handleGameWon() {
-		// TODO Auto-generated method stub
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleGameWon");
 		showToast(GAMEWON);
 	}
 
 	public void handlePlayerAccused() {
-		// TODO Auto-generated method stub
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handlePlayerAccused");
+		Toast.makeText(this, "Didn't call uno! Have some cards.", Toast.LENGTH_SHORT).show();
+	}
+	
+	public void handleUpdateQueue() {
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleUpdateQueue");
+		playerNames[0].setText(clientLogic.getSelf().getName());
+		for(int i=0;i<clientLogic.getOtherPlayers().size();i++){
+			playerNames[i].setText(clientLogic.getOtherPlayers().get(i).getName());
+		}
+	}
+
+	public void handleForceDraw() {
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleForceDraw");
+		
+	}
+
+	public void handleDrawTwo() {
+		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleDrawTwo");
+		
 	}
 }

@@ -150,8 +150,17 @@ public class ServerPlayer extends Player{
 		socket.write(msg);
 	}
 
+	public void sendBroadcastMessage(String msg) throws IOException {
+		socket.write(msg);
+	}
+
 	public void sendPlayedCardResult(boolean validAction) throws IOException {
-		socket.write((validAction)?ProtocolMessages.GTM_VALIDPLAY:ProtocolMessages.GTM_INVALIDPLAY);
+		if(validAction){
+			socket.write(ProtocolMessages.GTM_VALIDPLAY);
+		}
+		else{
+			socket.write(ProtocolMessages.GTM_INVALIDPLAY);
+		}
 	}
 
 	public void gameWon() throws IOException {

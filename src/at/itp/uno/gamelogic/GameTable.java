@@ -173,10 +173,11 @@ public class GameTable {
 	 * Broadcasts the id of the current player.
 	 * Returns the current player. 
 	 * @return
+	 * @throws IOException 
 	 */
-	public ServerPlayer nextTurn() {
+	public ServerPlayer nextTurn(){
 		ServerPlayer nextplayer = null;
-		if(playerqueue.size()>0){
+		if(playerqueue.size()>1){
 			nextplayer = playerqueue.getFirst();
 			for(int i=0;i<playerqueue.size();i++){
 				ServerPlayer player = playerqueue.get(i);
@@ -386,6 +387,18 @@ public class GameTable {
 	}
 
 	public void endGame(){
+		while(playerqueue.size()>0){
+			try {
+				playerqueue.getFirst().gameWon();
+			} catch (IOException e) {
+				try {
+					playerqueue.getFirst().getSocket().close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				e.printStackTrace();
+			}
+		}
 		for(ServerPlayer p:players){
 			try {
 				p.closeGame();
@@ -405,6 +418,20 @@ public class GameTable {
 	}
 
 	private void broadcastMessage(int msg, ServerPlayer currentPlayer){
+		for(ServerPlayer p:playerqueue){
+			if(currentPlayer!=null && p.getId()==currentPlayer.getId()){
+				continue;
+			}
+			try{
+				p.sendBroadcastMessage(msg);
+			}
+			catch(IOException ioe){
+				playerDisconnected(p);
+			}
+		}
+	}
+
+	private void broadcastMessage(String msg, ServerPlayer currentPlayer){
 		for(ServerPlayer p:playerqueue){
 			if(currentPlayer!=null && p.getId()==currentPlayer.getId()){
 				continue;
@@ -448,6 +475,25 @@ public class GameTable {
 				Log.e("UNO Table", e.getMessage());
 			}
 		}
+	}
+
+	public void noUnoCalled(ServerPlayer currentPlayer) throws IOException {
+		if(currentPlayer.getCards()==1){
+			Log.d("UNO Game", "No Uno called, dealing cards");
+			broadcastMessage(ProtocolMessages.GTM_ACCUSE, null);
+			broadcastMessage(currentPlayer.getId(), null);
+			dealCard(currentPlayer);
+			dealCard(currentPlayer);
+		}
+	}
+
+	public void broadcastQueue() {
+		broadcastMessage(ProtocolMessages.LM_STARTOFPLAYERLIST, null);
+		for(ServerPlayer p:playerqueue){
+			broadcastMessage(p.getId(), null);
+			broadcastMessage(p.getName(), null);
+		}
+		broadcastMessage(ProtocolMessages.LM_ENDOFPLAYERLIST, null);
 	}
 
 }

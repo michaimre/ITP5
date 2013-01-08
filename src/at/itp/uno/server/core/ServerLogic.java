@@ -15,7 +15,6 @@ import at.itp.uno.network.UnexpectedPlayerResponseEception;
 import at.itp.uno.network.UnoSocketWrapper;
 import at.itp.uno.network.protocol.ProtocolMessages;
 import at.itp.uno.server.ServerUI;
-import at.itp.uno.wifi.Service_WifiAdmin.Binder_Service_WifiAdmin;
 
 public class ServerLogic implements Runnable{
 
@@ -23,7 +22,6 @@ public class ServerLogic implements Runnable{
 	
 	private ServerUI serverUI;
 	private ServerSocket serverSocket;
-	private LobbyAdminListener lobbyAdminListener;
 	private int port;
 	private boolean lobbyOpen, forcestop;
 
@@ -152,6 +150,9 @@ public class ServerLogic implements Runnable{
 
 	public void gameLoop(){
 		serverUI.showMessage("Starting game loop");
+		//Boradcast player queue
+		gameTable.broadcastQueue();
+		
 		ServerPlayer currentPlayer = null;
 		while(!forcestop && (currentPlayer = gameTable.nextTurn())!=null){
 			boolean endofturn = Boolean.FALSE;
@@ -237,6 +238,15 @@ public class ServerLogic implements Runnable{
 				}
 			} catch(SocketTimeoutException ste){
 				//end of grace period
+				try{
+					if(!currentPlayer.isUnoCalled()){
+						gameTable.noUnoCalled(currentPlayer);
+					}
+				}
+				catch(IOException ioe){
+					gameTable.playerDisconnected(currentPlayer);
+					ioe.printStackTrace();
+				}
 			} catch (IOException e) {
 				gameTable.playerDisconnected(currentPlayer);
 				e.printStackTrace();
