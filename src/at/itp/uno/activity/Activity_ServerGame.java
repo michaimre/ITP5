@@ -6,12 +6,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import android.R.string;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -33,6 +37,9 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private static final boolean CW = Boolean.TRUE;
 	private static final boolean CCW = Boolean.FALSE;
 	
+	private static final int FALSECARD = 1;
+	private static final int NOTYOURTURN = 2;
+	private static final int GAMEWON = 3;
 
 	private Button b_sendBroadcast;
 	private Binder_Service_WifiAdmin _service = null;
@@ -149,7 +156,6 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		stapel_hin.setOnClickListener(this);
 		mischen.setOnClickListener(this);
 		uno.setOnClickListener(this);
-		turndir.setOnClickListener(this);
 
 		horizontalLayout = (LinearLayout) findViewById(R.id.scrollViewLinearLayout);
 		stapelLayout = (LinearLayout) findViewById(R.id.linearLayout_stapel);
@@ -159,8 +165,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 				View.MeasureSpec.makeMeasureSpec(0, 0));
 
 		layoutParams = new LinearLayout.LayoutParams(new Double(
-				0.60 * stapel_hin.getMeasuredWidth()).intValue(), new Double(
-						0.60 * stapel_hin.getMeasuredHeight()).intValue());
+				0.55 * stapel_hin.getMeasuredWidth()).intValue(), new Double(
+						0.55 * stapel_hin.getMeasuredHeight()).intValue());
 
 		stapel_ab.setLayoutParams(layoutParams);
 		stapel_hin.setLayoutParams(layoutParams);
@@ -187,7 +193,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 						removeCardFromHand(j);
 					}
 					else{
-						//TODO fancy invalid play notification
+						showToast(FALSECARD);
 						Log.d("UNO Game"+clientLogic.getSelf().getName(), "invalid card");
 					}
 				}
@@ -195,6 +201,42 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 				e.printStackTrace();
 			}
 		}
+		else {
+			showToast(NOTYOURTURN);
+		}
+	}
+
+	private void showToast(int param) {
+		LayoutInflater inflater = getLayoutInflater();
+		View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_root));
+
+		TextView text = (TextView) layout.findViewById(R.id.toast_text);
+		ImageView image = (ImageView) layout.findViewById(R.id.toast_imageView);
+		
+		switch (param) {
+		case FALSECARD:
+			image.setImageResource(R.drawable.kick);
+			text.setText(R.string.t_cannotPlayCard);
+			break;
+
+		case NOTYOURTURN:
+			image.setImageResource(R.drawable.kick);
+			text.setText(R.string.t_cannotPlayCardOtherPlayersTurn);
+			break;
+			
+		case GAMEWON:
+			image.setImageResource(R.drawable.stern);
+			text.setText(R.string.t_gameWon);
+			
+		default:
+			break;
+		}
+		
+		Toast toast = new Toast(getApplicationContext());
+		toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+		toast.setDuration(Toast.LENGTH_LONG);
+		toast.setView(layout);
+		toast.show();
 	}
 
 	@Override
@@ -442,7 +484,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	public void handleGameWon() {
 		Log.d("UNO Game"+clientLogic.getSelf().getName(), "handleGameWon");
-		Toast.makeText(this, "GZ! \\o/", Toast.LENGTH_SHORT).show();
+		showToast(GAMEWON);
 	}
 
 	public void handlePlayerAccused() {
