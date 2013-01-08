@@ -17,7 +17,6 @@ import at.itp.uno.data.Card;
 import at.itp.uno.data.CardFaces;
 import at.itp.uno.data.ClientPlayer;
 import at.itp.uno.data.HandCards;
-import at.itp.uno.data.Player;
 import at.itp.uno.network.UnoSocketWrapper;
 import at.itp.uno.network.protocol.ProtocolMessages;
 
@@ -238,6 +237,16 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 			}
 		}
 		try {
+			//get player queue
+			if(self.getSocket().read()!=ProtocolMessages.LM_STARTOFPLAYERLIST){
+				otherPlayers.clear();
+				int m;
+				while((m=self.getSocket().read())!=ProtocolMessages.LM_ENDOFPLAYERLIST){
+					ClientPlayer cp = new ClientPlayer(m);
+					cp.setName(self.getSocket().readString());
+				}
+			}
+			
 			while(!gamewon){
 				clientUI.showDebug("Listening...");
 				int action = self.getSocket().read();
@@ -256,6 +265,10 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 					
 				case ProtocolMessages.GTM_ENDOFTURN:
 					endOfTurn();
+					break;
+					
+				case ProtocolMessages.GTM_ACCUSE:
+					accusePlayer();
 					break;
 					
 				case ProtocolMessages.GTM_GAMEWON:
@@ -424,12 +437,12 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		clientUI.showDebug("Calling uno");
 		clientGameUI.callUno();
 		self.getSocket().write(ProtocolMessages.GTM_CALLUNO);
-		validPlay = true;
-		logicThread.interrupt();
+		//validPlay = true;
+		//logicThread.interrupt();
 	}
 
 	@Override
-	public void accusePlayer(Player player) throws IOException {
+	public void accusePlayer() throws IOException {
 		// TODO Auto-generated method stub
 
 	}
