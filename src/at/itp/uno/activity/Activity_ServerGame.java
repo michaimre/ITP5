@@ -71,7 +71,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 
 	private ClientLogic clientLogic;
 	private boolean myTurn, turndirval, setup;
-	private int color;
+	private int color, cardindex;
 
 	/** Handles UI updates
 	 *  Receives messages from the logic thread
@@ -184,6 +184,8 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		stapel_hin.setLayoutParams(layoutParams);
 		drawCardsOnScrollView(cardsList);
 		
+		cardsList.add(new Card(CardFaces.WILD, (short)0));
+		
 		setup = true;
 	}
 
@@ -200,17 +202,13 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 				} else if(v.equals(uno)) {
 					clientLogic.callUno();
 				} else {
-					int j = horizontalLayout.indexOfChild(v);
-					color = 0;
-					if(cardsList.get(j).getColor()==0){
+					cardindex = horizontalLayout.indexOfChild(v);
+					color = -1;
+					if(cardsList.get(cardindex).getColor()==0){
 						showDialog(DIALOG_CHOOSE_COLOR);
 					}
-					if(clientLogic.playCard(cardsList.get(j), color)){
-						removeCardFromHand(j);
-					}
 					else{
-						showToast(FALSECARD);
-						Log.d("UNO Game"+clientLogic.getSelf().getName(), "invalid card");
+						playCard(cardsList.get(cardindex), 0);
 					}
 				}
 			} catch (IOException e) {
@@ -222,6 +220,21 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 		}
 		else {
 			showToast(NOTYOURTURN);
+		}
+	}
+	
+	public void playCard(Card card, int color){
+		try {
+			Log.d("UNO Game"+clientLogic.getSelf().getName(), "color: "+color);
+			if(clientLogic.playCard(cardsList.get(cardindex), color)){
+				removeCardFromHand(cardindex);
+			}
+			else{
+				showToast(FALSECARD);
+				Log.d("UNO Game"+clientLogic.getSelf().getName(), "invalid card");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -269,6 +282,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 	private final class DialogItemListener_color implements DialogInterface.OnClickListener{
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
+			int color = 0;
 			if (which == 0) {
 				color = CardFaces.RED;
 			} else if (which == 1) {
@@ -278,6 +292,7 @@ public class Activity_ServerGame extends Activity implements View.OnClickListene
 			} else if (which == 4) {
 				color = CardFaces.YELLOW;
 			}
+			playCard(cardsList.get(cardindex), color);
 		}
 	}
 	

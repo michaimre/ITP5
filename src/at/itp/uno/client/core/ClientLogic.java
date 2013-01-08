@@ -238,14 +238,16 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		}
 		try {
 			//get player queue
-			if(false && self.getSocket().read()!=ProtocolMessages.LM_STARTOFPLAYERLIST){
-				otherPlayers.clear();
-				int m;
-				while((m=self.getSocket().read())!=ProtocolMessages.LM_ENDOFPLAYERLIST){
-					ClientPlayer cp = new ClientPlayer(m);
-					cp.setName(self.getSocket().readString());
-				}
-			}
+//			if(self.getSocket().read()!=ProtocolMessages.LM_STARTOFPLAYERLIST){
+//				Log.d("UNO Logic"+self.getName(), "Reading player queue");
+//				otherPlayers.clear();
+//				int m;
+//				while((m=self.getSocket().read())!=ProtocolMessages.LM_ENDOFPLAYERLIST){
+//					ClientPlayer cp = new ClientPlayer(m);
+//					cp.setName(self.getSocket().readString());
+//					Log.d("UNO Logic"+self.getName(), "id: "+m+", name: "+cp.getName());
+//				}
+//			}
 			
 			while(!gamewon){
 				clientUI.showDebug("Listening...");
@@ -435,6 +437,7 @@ public class ClientLogic extends PlayerActionHandler implements Runnable, Serial
 		self.getSocket().write(ProtocolMessages.GTM_PLAYCARD);
 		self.getSocket().write(card.getFace());
 		if(card.getValue() == CardFaces.WILD || card.getValue() == CardFaces.WILDFOUR){
+			Log.d("UNO Logic"+self.getName(), "wild color is: "+color);
 			self.getSocket().write(color);
 		}
 		int i = self.getSocket().read();
